@@ -1,7 +1,7 @@
 package com.drugbox.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -35,4 +35,9 @@ public class CustomExceptionHandler {
         return ErrorResponse.toResponseEntity(HttpStatus.BAD_REQUEST, fieldError);
     }
 
+    @ExceptionHandler(SizeLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleSizeLimitExceededException(SizeLimitExceededException ex) {
+        log.info("SizeLimitExceededException :: " + ex.getLocalizedMessage());
+        return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.IMAGE_SIZE_EXCEEDED));
+    }
 }

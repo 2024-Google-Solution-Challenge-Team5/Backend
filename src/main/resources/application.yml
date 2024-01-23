@@ -9,9 +9,28 @@ spring:
     password: ${application.spring.datasource.password}
 
   jpa:
+    generate-ddl: true
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: ${application.spring.cloud.gcp.storage.credentials.location}
+        project-id: ${application.spring.cloud.gcp.storage.project-id}
+        bucket: ${application.spring.cloud.gcp.storage.bucket}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
