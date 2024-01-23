@@ -22,11 +22,9 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @ManyToMany
-    @JoinTable(name = "user_drugbox",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "drugbox_id"))
-    private List<Drugbox> drugboxes = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<UserDrugbox> userDrugboxes = new ArrayList<>();
 
     @Column(unique = true, length = 20)
     private String nickname;

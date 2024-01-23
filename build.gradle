@@ -40,6 +40,10 @@ dependencies {
 
     // Swagger
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+    // Google Cloud Platform (GCP)
+    implementation 'org.springframework.cloud:spring-cloud-gcp-starter:1.2.5.RELEASE'
+    implementation 'org.springframework.cloud:spring-cloud-gcp-storage:1.2.5.RELEASE'
 }
 
 tasks.named('test') {
