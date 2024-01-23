@@ -1,5 +1,7 @@
 package com.drugbox.service;
 
+import com.drugbox.common.exception.CustomException;
+import com.drugbox.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,10 @@ public class ImageService {
 
     public String uploadImage(MultipartFile image) throws IOException {
         String uuid = UUID.randomUUID().toString(); // Google Cloud Storage에 저장될 파일 이름
-        String ext = image.getContentType();
+        String ext = image.getContentType(); // 불가: application/octet-stream(jfif파일), 가능: image/jpeg 등
+        if(ext.equals("application/octet-stream")){
+            throw new CustomException(ErrorCode.IMAGE_TYPE_INVALID);
+        }
 
         BlobInfo blobInfo = storage.create(
                 BlobInfo.newBuilder(bucketName, uuid)
