@@ -1,6 +1,5 @@
 package com.drugbox.dto.response;
 
-import com.drugbox.domain.Drugbox;
 import lombok.Builder;
 import lombok.Getter;
 
