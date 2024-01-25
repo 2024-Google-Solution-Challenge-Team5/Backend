@@ -43,4 +43,8 @@ public class Drugbox extends BaseEntity {
                 .build();
         return drugbox;
     }
+
+    public void setDrugs(List<Drug> drugs) {
+        this.drugs = drugs;
+    }
 }

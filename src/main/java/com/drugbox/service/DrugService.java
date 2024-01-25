@@ -43,6 +43,12 @@ public class DrugService {
                     .drugbox(drugbox)
                     .build();
             drugRepository.save(drug);
+
+            List<Drug> drugs = drugbox.getDrugs();
+            drugs.add(drug);
+            drugbox.setDrugs(drugs);
+            drugboxRepository.save(drugbox);
+
             ids.add(drug.getId());
         }
 
