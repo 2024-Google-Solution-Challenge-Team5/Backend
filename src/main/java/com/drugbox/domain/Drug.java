@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -22,9 +26,14 @@ public class Drug extends BaseEntity {
     private Long id;
 
     private String name;
+    private String type;
     private int count;
     private String location;
     private LocalDate expDate;
     @Builder.Default
     private int status=0;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "drugbox_id")
+    private Drugbox drugbox;
 }

@@ -26,6 +26,10 @@ public class Drugbox extends BaseEntity {
     @Builder.Default
     private List<UserDrugbox> userDrugboxes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "drugbox", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Drug> drugs = new ArrayList<>();
+
     private String name;
     private String image;
     private String inviteCode;
@@ -38,5 +42,9 @@ public class Drugbox extends BaseEntity {
                 .inviteCode(inviteCode)
                 .build();
         return drugbox;
+    }
+
+    public void setDrugs(List<Drug> drugs) {
+        this.drugs = drugs;
     }
 }
