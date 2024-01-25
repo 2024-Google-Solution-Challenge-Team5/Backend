@@ -57,10 +57,10 @@ public class DrugService {
 
     // 의약품 리스트 확인하기
     public List<DrugResponse> getDrugList(Long DrugboxId){
-        getDrugboxOrThrow(DrugboxId);
-        List<Long> list = drugboxRepository.findDrugIdByDrugboxId(DrugboxId);
+        Drugbox drugbox = getDrugboxOrThrow(DrugboxId);
+        List<Drug> list = drugbox.getDrugs();
         return list.stream()
-                .map(id-> DrugToDrugResponse(getDrugOrThrow(id)))
+                .map(drug-> DrugToDrugResponse(getDrugOrThrow(drug)))
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +69,8 @@ public class DrugService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGBOX));
     }
 
-    private Drug getDrugOrThrow(Long drugId){
+    private Drug getDrugOrThrow(Drug drug){
+        Long drugId = drug.getId();
         return drugRepository.findById(drugId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUG));
     }
