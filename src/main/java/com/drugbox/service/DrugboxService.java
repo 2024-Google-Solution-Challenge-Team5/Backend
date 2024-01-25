@@ -66,6 +66,12 @@ public class DrugboxService {
                 .collect(Collectors.toList());
     }
 
+    // 구급상자 이름 변경하기
+    public void changeDrugboxName(Long drugboxId, String name){
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        drugbox.setName(name);
+    }
+
     // 예외 처리 - 존재하는 User 인가
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)

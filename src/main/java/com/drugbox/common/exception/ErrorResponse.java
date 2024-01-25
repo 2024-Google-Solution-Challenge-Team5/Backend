@@ -48,6 +48,19 @@ public class ErrorResponse {
                 );
     }
 
+    public static ResponseEntity<ErrorResponse> toResponseEntity(HttpStatus httpStatus, String code, String message) {
+        return ResponseEntity
+                .status(httpStatus)
+                .body(
+                        ErrorResponse.builder()
+                                .status(httpStatus.value())//httpStatus 코드
+                                .error(httpStatus.name())//httpStatus 이름
+                                .code(code)//errorCode 의 이름
+                                .detail(message)//errorCode 상세
+                                .build()
+                );
+    }
+
     public static ResponseEntity<ErrorResponse> toResponseEntity(HttpStatus httpStatus) {
         return ResponseEntity
                 .status(httpStatus)

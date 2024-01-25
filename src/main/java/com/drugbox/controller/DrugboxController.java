@@ -7,14 +7,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -47,5 +50,13 @@ public class DrugboxController {
     public ResponseEntity<List<DrugboxResponse>> getUserDrugboxes(@RequestParam(value="userId") Long userId) {
         List<DrugboxResponse> response = drugboxService.getUserDrugboxes(userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    // 구급상자 이름 변경하기
+    @PatchMapping("/setting/name")
+    public ResponseEntity<Void> changeDrugboxName(@RequestParam(value="drugboxId") Long drugboxId,
+                                                  @RequestParam(value="name") @NotBlank String name){
+        drugboxService.changeDrugboxName(drugboxId, name);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

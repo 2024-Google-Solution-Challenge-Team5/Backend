@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Objects;
 
 @Slf4j
@@ -39,5 +40,11 @@ public class CustomExceptionHandler {
     public ResponseEntity<ErrorResponse> handleSizeLimitExceededException(SizeLimitExceededException ex) {
         log.info("SizeLimitExceededException :: " + ex.getLocalizedMessage());
         return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.IMAGE_SIZE_EXCEEDED));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<ErrorResponse> handleBindException(ConstraintViolationException e) {
+        log.info("ConstraintViolationException :: " + e.getMessage());
+        return ErrorResponse.toResponseEntity(HttpStatus.BAD_REQUEST, "CONSTRAINT_VIOLATION", e.getMessage());
     }
 }
