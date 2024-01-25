@@ -1,5 +1,6 @@
 package com.drugbox.controller;
 
+import com.drugbox.dto.request.DrugboxImageChangeRequest;
 import com.drugbox.dto.request.DrugboxSaveRequest;
 import com.drugbox.dto.response.DrugboxResponse;
 import com.drugbox.service.DrugboxService;
@@ -57,6 +58,13 @@ public class DrugboxController {
     public ResponseEntity<Void> changeDrugboxName(@RequestParam(value="drugboxId") Long drugboxId,
                                                   @RequestParam(value="name") @NotBlank String name){
         drugboxService.changeDrugboxName(drugboxId, name);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    // 구급상자 사진 변경하기
+    @PatchMapping("/setting/image")
+    public ResponseEntity<Void> changeDrugboxImage(@Valid DrugboxImageChangeRequest request) throws IOException {
+        drugboxService.changeDrugboxImage(request);
         return new ResponseEntity(HttpStatus.OK);
     }
 }
