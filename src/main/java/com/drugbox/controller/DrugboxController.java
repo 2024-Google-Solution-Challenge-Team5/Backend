@@ -3,6 +3,7 @@ package com.drugbox.controller;
 import com.drugbox.dto.request.DrugboxImageChangeRequest;
 import com.drugbox.dto.request.DrugboxSaveRequest;
 import com.drugbox.dto.response.DrugboxResponse;
+import com.drugbox.dto.response.DrugboxSettingResponse;
 import com.drugbox.service.DrugboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,5 +67,12 @@ public class DrugboxController {
     public ResponseEntity<Void> changeDrugboxImage(@Valid DrugboxImageChangeRequest request) throws IOException {
         drugboxService.changeDrugboxImage(request);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    // 구급상자 세부설정 조회하기
+    @GetMapping("/setting")
+    public ResponseEntity<DrugboxSettingResponse> getDrugboxSetting(@RequestParam(value="drugboxId") Long drugboxId) {
+        DrugboxSettingResponse response = drugboxService.getDrugboxSetting(drugboxId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

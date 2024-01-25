@@ -6,6 +6,8 @@ import com.drugbox.domain.UserDrugbox;
 import com.drugbox.dto.request.DrugboxImageChangeRequest;
 import com.drugbox.dto.request.DrugboxSaveRequest;
 import com.drugbox.dto.response.DrugboxResponse;
+import com.drugbox.dto.response.DrugboxSettingResponse;
+import com.drugbox.dto.response.UserResponse;
 import com.drugbox.repository.DrugboxRepository;
 import com.drugbox.domain.User;
 import com.drugbox.domain.Drugbox;
@@ -76,6 +78,25 @@ public class DrugboxService {
         Drugbox drugbox = getDrugboxOrThrow(request.getDrugboxId());
         String imageUUID = checkImageUUID(request.getImage());
         drugbox.setImage(imageUUID);
+    }
+
+    // 구급상자 세부설정 조회하기
+    public DrugboxSettingResponse getDrugboxSetting(Long drugboxId) {
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        List<UserResponse> users = drugbox.getUserDrugboxes().stream()
+                .map(UserDrugbox::getUser)
+                .map(user -> UserResponse.builder()
+                        .nickname(user.getNickname())
+                        .userId(user.getId())
+                        .build())
+                .collect(Collectors.toList());
+        return DrugboxSettingResponse.builder()
+                .name(drugbox.getName())
+                .drugboxId(drugbox.getId())
+                .image(imageService.processImage(drugbox.getImage()))
+                .inviteCode(drugbox.getInviteCode())
+                .users(users)
+                .build();
     }
 
     // 예외 처리 - 존재하는 User 인가
