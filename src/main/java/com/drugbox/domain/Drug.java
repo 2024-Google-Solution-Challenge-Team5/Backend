@@ -26,6 +26,7 @@ public class Drug extends BaseEntity {
     private Long id;
 
     private String name;
+    private String type;
     private int count;
     private String location;
     private LocalDate expDate;

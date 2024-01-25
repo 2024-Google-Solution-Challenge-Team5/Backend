@@ -36,6 +36,7 @@ public class DrugService {
             DrugDetailRequest detail = request.getDetail().get(i);
             Drug drug = Drug.builder()
                     .name(request.getName())
+                    .type(request.getType())
                     .count(detail.getCount())
                     .location(detail.getLocation())
                     .expDate(detail.getExpDate())

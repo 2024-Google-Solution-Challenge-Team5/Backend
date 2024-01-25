@@ -15,6 +15,7 @@ public class DrugRequest {
     private Long drugboxId;
     @NotNull
     private String name;
+    private String type;
     private List<DrugDetailRequest> detail;
 
 }
