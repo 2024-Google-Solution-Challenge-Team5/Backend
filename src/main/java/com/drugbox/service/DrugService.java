@@ -6,8 +6,8 @@ import com.drugbox.domain.Drug;
 import com.drugbox.domain.Drugbox;
 import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
+import com.drugbox.dto.request.DrugUseRequest;
 import com.drugbox.dto.response.DrugResponse;
-import com.drugbox.dto.response.DrugboxResponse;
 import com.drugbox.repository.DrugRepository;
 import com.drugbox.repository.DrugboxRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +63,28 @@ public class DrugService {
                 .collect(Collectors.toList());
     }
 
+    // 의약품 사용하기
+    public void useDrug(List<DrugUseRequest> drugUseRequests){
+        for(DrugUseRequest drugUseList : drugUseRequests){
+            Drugbox drugbox = getDrugboxOrThrow(drugUseList.getDrugboxId());
+            for(Long drugId : drugUseList.getDrugIds()){
+                Drug drug = getDrugOrThrowById(drugId);
+                int count = drug.getCount()-1;
+
+                drug.setCount(count);
+                drugRepository.save(drug);
+
+                List<Drug> drugs = drugbox.getDrugs();
+                int index = drugs.indexOf(drugId);
+                Drug boxDrug = drugs.get(index);
+                boxDrug.setCount(count);
+                drugs.set(index, boxDrug);
+                drugbox.setDrugs(drugs);
+                drugboxRepository.save(drugbox);
+            }
+        }
+    }
+
     private Drugbox getDrugboxOrThrow(Long drugboxId) {
         return drugboxRepository.findById(drugboxId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGBOX));
@@ -71,6 +92,11 @@ public class DrugService {
 
     private Drug getDrugOrThrow(Drug drug){
         Long drugId = drug.getId();
+        return drugRepository.findById(drugId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUG));
+    }
+
+    private Drug getDrugOrThrowById(Long drugId){
         return drugRepository.findById(drugId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUG));
     }

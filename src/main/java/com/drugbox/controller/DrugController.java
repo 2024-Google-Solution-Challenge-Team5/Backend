@@ -1,6 +1,7 @@
 package com.drugbox.controller;
 
 import com.drugbox.dto.request.DrugRequest;
+import com.drugbox.dto.request.DrugUseRequest;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.dto.response.IdResponse;
 import com.drugbox.service.DrugService;
@@ -34,5 +35,11 @@ public class DrugController {
                 .map(id -> IdResponse.builder().id(id).build())
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/use")
+    public ResponseEntity<Void> useDrugs(List<DrugUseRequest> drugUseRequests){
+        drugService.useDrug(drugUseRequests);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
