@@ -85,6 +85,23 @@ public class DrugService {
         }
     }
 
+    // 의약품 폐기리스트로 옮기기
+    public void disposeDrug(Long drugboxId, Long drugId){
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        Drug drug = getDrugOrThrowById(drugId);
+
+        drug.setStatus(1);
+        drugRepository.save(drug);
+
+        List<Drug> drugs = drugbox.getDrugs();
+        int index = drugs.indexOf(drugId);
+        Drug boxDrug = drugs.get(index);
+        boxDrug.setStatus(1);
+        drugs.set(index, boxDrug);
+        drugbox.setDrugs(drugs);
+        drugboxRepository.save(drugbox);
+    }
+
     private Drugbox getDrugboxOrThrow(Long drugboxId) {
         return drugboxRepository.findById(drugboxId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGBOX));

@@ -41,4 +41,8 @@ public class Drug extends BaseEntity {
         this.count = count;
     }
 
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
 }
