@@ -47,4 +47,6 @@ public class Drugbox extends BaseEntity {
     public void setDrugs(List<Drug> drugs) {
         this.drugs = drugs;
     }
+    public void setName(String name) {this.name = name; }
+    public void setImage(String image) {this.image = image;}
 }

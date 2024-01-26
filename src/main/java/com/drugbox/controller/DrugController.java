@@ -2,6 +2,7 @@ package com.drugbox.controller;
 
 import com.drugbox.dto.request.DrugRequest;
 import com.drugbox.dto.response.DrugResponse;
+import com.drugbox.dto.response.IdResponse;
 import com.drugbox.service.DrugService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,10 +28,11 @@ public class DrugController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String,List<Long>>> addDrug(@Valid DrugRequest drugRequest){
+    public ResponseEntity<List<IdResponse>> addDrug(@RequestBody @Valid DrugRequest drugRequest){
         List<Long> ids = drugService.addDrug(drugRequest);
-        Map<String, List<Long>> response = new HashMap<>();
-        response.put("drugids",ids);
+        List<IdResponse> response = ids.stream()
+                .map(id -> IdResponse.builder().id(id).build())
+                .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
 }

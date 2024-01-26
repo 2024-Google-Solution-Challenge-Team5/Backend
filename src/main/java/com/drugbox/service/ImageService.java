@@ -26,8 +26,8 @@ public class ImageService {
 
     public String uploadImage(MultipartFile image) throws IOException {
         String uuid = UUID.randomUUID().toString(); // Google Cloud Storage에 저장될 파일 이름
-        String ext = image.getContentType(); // 불가: application/octet-stream(jfif파일), 가능: image/jpeg 등
-        if(ext.equals("application/octet-stream")){
+        String ext = image.getContentType(); // 불가: application/octet-stream(jfif파일), 가능: image/jpeg, image/png 등
+        if(!ext.contains("image")){
             throw new CustomException(ErrorCode.IMAGE_TYPE_INVALID);
         }
 
