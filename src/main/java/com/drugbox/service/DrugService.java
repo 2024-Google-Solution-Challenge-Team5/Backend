@@ -7,14 +7,18 @@ import com.drugbox.domain.Drugbox;
 import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
 import com.drugbox.dto.request.DrugUseRequest;
+import com.drugbox.dto.response.DrugDetailResponse;
+import com.drugbox.dto.response.DrugListResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.repository.DrugRepository;
 import com.drugbox.repository.DrugboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 public class DrugService {
     private final DrugRepository drugRepository;
     private final DrugboxRepository drugboxRepository;
+    private final DrugApiService drugApiService;
 
     // 의약품 추가하기
     public List<Long> addDrug(DrugRequest request){
@@ -100,6 +105,30 @@ public class DrugService {
         drugs.set(index, boxDrug);
         drugbox.setDrugs(drugs);
         drugboxRepository.save(drugbox);
+    }
+
+    // 의약품 상세정보 확인하기
+    public DrugDetailResponse getDrugDetail(Long drugboxId, String name) throws IOException, ParseException {
+        List<Drug> drugs = getDrugboxOrThrow(drugboxId).getDrugs();
+        List<Drug> results = drugs.stream()
+                .filter(drug -> name.equals(drug.getName()))
+                .collect(Collectors.toList());
+
+        List<DrugListResponse> drugListResponses = new ArrayList<>();
+        for(Drug result : results){
+            DrugListResponse drugListResponse = DrugListResponse.builder()
+                    .location(result.getLocation())
+                    .count(result.getCount())
+                    .expDate(result.getExpDate())
+                    .build();
+            drugListResponses.add(drugListResponse);
+        }
+
+        return DrugDetailResponse.builder()
+                .name(name)
+                .drugListResponseList(drugListResponses)
+                .effect(drugApiService.getDrugInfo(name))
+                .build();
     }
 
     private Drugbox getDrugboxOrThrow(Long drugboxId) {
