@@ -76,4 +76,12 @@ public class DrugboxController {
         DrugboxSettingResponse response = drugboxService.getDrugboxSetting(drugboxId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    // 닉네임으로 구급상자 초대하기
+    @PostMapping("/invite")
+    public ResponseEntity<Void> inviteUserToDrugbox(@RequestParam(value="drugboxId") Long drugboxId,
+                                                    @RequestParam(value="nickname") String nickname){
+        drugboxService.inviteUserToDrugbox(drugboxId, nickname);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

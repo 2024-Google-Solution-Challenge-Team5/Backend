@@ -14,6 +14,7 @@ public enum ErrorCode {
 
     // Drugbox 예외
     NOT_FOUND_DRUGBOX(HttpStatus.NOT_FOUND, "해당 drugbox를 찾을 수 없습니다."),
+    USER_ALREADY_DRUGBOX_MEMBER(HttpStatus.CONFLICT, "해당 유저가 이미 해당 구급상자 그룹에 속해있습니다."),
 
     // Drug 예외
     NOT_FOUND_DRUG(HttpStatus.NOT_FOUND, "해당 약 정보를 찾을 수 없습니다."),
