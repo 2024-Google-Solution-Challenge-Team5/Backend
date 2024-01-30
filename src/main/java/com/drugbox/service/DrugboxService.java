@@ -115,6 +115,15 @@ public class DrugboxService {
         notificationRepository.save(notification);
     }
 
+    // 구급상자 초대 수락하기
+    public void acceptInvitation(Long drugboxId, Long userId){
+        User invitee = getUserOrThrow(userId);
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        checkIfUserIsDrugboxMember(invitee, drugbox);
+        UserDrugbox userDrugbox = UserDrugbox.createUserDrugbox(invitee, drugbox);
+        userDrugboxRepository.save(userDrugbox);
+    }
+
     // 예외 처리 - 존재하는 User 인가
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
@@ -152,7 +161,7 @@ public class DrugboxService {
     private void checkIfUserIsDrugboxMember(User user, Drugbox drugbox){
         List<UserDrugbox> uds = drugbox.getUserDrugboxes();
         for(UserDrugbox ud: uds){
-            if(ud.getUser()==user)
+            if(ud.getUser() == user)
                 throw new CustomException(ErrorCode.USER_ALREADY_DRUGBOX_MEMBER);
         }
     }

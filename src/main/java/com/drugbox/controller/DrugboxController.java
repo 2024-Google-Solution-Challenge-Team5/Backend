@@ -84,4 +84,12 @@ public class DrugboxController {
         drugboxService.inviteUserToDrugbox(drugboxId, nickname);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    // 구급상자 초대 수락하기
+    @PostMapping("/invite/accept")
+    public ResponseEntity<Void> acceptInvitation(@RequestParam(value="drugboxId") Long drugboxId,
+                                                 @RequestParam(value="userId") Long userId){
+        drugboxService.acceptInvitation(drugboxId, userId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
