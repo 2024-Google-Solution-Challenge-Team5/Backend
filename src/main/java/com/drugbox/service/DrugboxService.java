@@ -11,6 +11,7 @@ import com.drugbox.dto.response.UserResponse;
 import com.drugbox.repository.DrugboxRepository;
 import com.drugbox.domain.User;
 import com.drugbox.domain.Drugbox;
+import com.drugbox.repository.NotificationRepository;
 import com.drugbox.repository.UserDrugboxRepository;
 import com.drugbox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +32,7 @@ public class DrugboxService {
     private final DrugboxRepository drugboxRepository;
     private final UserRepository userRepository;
     private final UserDrugboxRepository userDrugboxRepository;
+    private final NotificationRepository notificationRepository;
     private final ImageService imageService;
 
 
