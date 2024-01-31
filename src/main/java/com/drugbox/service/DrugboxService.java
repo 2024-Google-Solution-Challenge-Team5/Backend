@@ -2,6 +2,7 @@ package com.drugbox.service;
 
 import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
+import com.drugbox.domain.Notification;
 import com.drugbox.domain.UserDrugbox;
 import com.drugbox.dto.request.DrugboxImageChangeRequest;
 import com.drugbox.dto.request.DrugboxSaveRequest;
@@ -11,6 +12,7 @@ import com.drugbox.dto.response.UserResponse;
 import com.drugbox.repository.DrugboxRepository;
 import com.drugbox.domain.User;
 import com.drugbox.domain.Drugbox;
+import com.drugbox.repository.NotificationRepository;
 import com.drugbox.repository.UserDrugboxRepository;
 import com.drugbox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ public class DrugboxService {
     private final DrugboxRepository drugboxRepository;
     private final UserRepository userRepository;
     private final UserDrugboxRepository userDrugboxRepository;
+    private final NotificationRepository notificationRepository;
     private final ImageService imageService;
 
 
@@ -99,9 +101,37 @@ public class DrugboxService {
                 .build();
     }
 
+    // 닉네임으로 구급상자 초대하기
+    public void inviteUserToDrugbox(Long drugboxId, String nickname){
+        User invitee = getUserOrThrow(nickname);
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        checkIfUserIsDrugboxMember(invitee, drugbox);
+        Notification notification = Notification.builder()
+                .user(invitee)
+                .title("구급상자 초대")
+                .message(invitee.getNickname() + "님이 구급상자(" + drugbox.getName() + ")에 초대되었습니다.")
+                .extraInfo("drugbox ID=" + drugbox.getId())
+                .build();
+        notificationRepository.save(notification);
+    }
+
+    // 구급상자 초대 수락하기
+    public void acceptInvitation(Long drugboxId, Long userId){
+        User invitee = getUserOrThrow(userId);
+        Drugbox drugbox = getDrugboxOrThrow(drugboxId);
+        checkIfUserIsDrugboxMember(invitee, drugbox);
+        UserDrugbox userDrugbox = UserDrugbox.createUserDrugbox(invitee, drugbox);
+        userDrugboxRepository.save(userDrugbox);
+    }
+
     // 예외 처리 - 존재하는 User 인가
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    private User getUserOrThrow(String nickname) {
+        return userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 
@@ -126,5 +156,13 @@ public class DrugboxService {
             imageUUID = imageService.uploadImage(image);
         }
         return imageUUID;
+    }
+
+    private void checkIfUserIsDrugboxMember(User user, Drugbox drugbox){
+        List<UserDrugbox> uds = drugbox.getUserDrugboxes();
+        for(UserDrugbox ud: uds){
+            if(ud.getUser() == user)
+                throw new CustomException(ErrorCode.USER_ALREADY_DRUGBOX_MEMBER);
+        }
     }
 }
