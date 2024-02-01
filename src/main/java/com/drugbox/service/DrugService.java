@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,16 +77,21 @@ public class DrugService {
                 Drug drug = getDrugOrThrowById(drugId);
                 int count = drug.getCount()-1;
 
-                drug.setCount(count);
-                drugRepository.save(drug);
-
-                List<Drug> drugs = drugbox.getDrugs();
-                int index = drugs.indexOf(drugId);
-                Drug boxDrug = drugs.get(index);
-                boxDrug.setCount(count);
-                drugs.set(index, boxDrug);
-                drugbox.setDrugs(drugs);
-                drugboxRepository.save(drugbox);
+                if(count==0){ // count 0되면 삭제
+                    drugRepository.delete(drug);
+                    List<Drug> drugs = drugbox.getDrugs();
+                    for (Iterator<Drug> iterator = drugs.iterator(); iterator.hasNext();) {
+                        Drug boxDrug = iterator.next();
+                        if (boxDrug.getId().equals(drugId)) {
+                            iterator.remove(); // 리스트에서 삭제
+                            break;
+                        }
+                    }
+                }else {
+                    drug.setCount(count);
+                    drugRepository.save(drug);
+                    drugboxRepository.save(drugbox);
+                }
             }
         }
     }
@@ -97,13 +103,6 @@ public class DrugService {
 
         drug.setStatus(1);
         drugRepository.save(drug);
-
-        List<Drug> drugs = drugbox.getDrugs();
-        int index = drugs.indexOf(drugId);
-        Drug boxDrug = drugs.get(index);
-        boxDrug.setStatus(1);
-        drugs.set(index, boxDrug);
-        drugbox.setDrugs(drugs);
         drugboxRepository.save(drugbox);
     }
 
