@@ -2,6 +2,7 @@ package com.drugbox.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,11 @@ import org.json.simple.parser.ParseException;
 @Slf4j
 @Transactional
 public class DrugApiService {
+    @Value("${application.spring.api.key}")
+    private String key;
+    @Value("${application.spring.api.url}")
+    private String url;
+
     public String getDrugInfo(String drugName) throws IOException, ParseException {
         URL url = new URL(createUrlForDrugDetail(drugName));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -46,8 +52,8 @@ public class DrugApiService {
     }
 
     public String createUrlForDrugDetail(String name) throws IOException{
-        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"); // api url
-        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=rsbkswEZaOZIDED3uNDy6FGvvXfmixuSLvKgzRWPIrzgqRjyHrYOrMnuNdh00HkHnBnqYOwpDjlqiklnucfJog%3D%3D");
+        StringBuilder urlBuilder = new StringBuilder(url); // api url
+        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=" + key); // api key
         urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); // 검색 결과 개수
         urlBuilder.append("&" + URLEncoder.encode("itemName","UTF-8") + "=" + URLEncoder.encode(name, "UTF-8")); // 찾는 의약품 이름
         urlBuilder.append("&" + URLEncoder.encode("type","UTF-8") + "=" + URLEncoder.encode("json", "UTF-8")); // xml,json 중 json
