@@ -36,4 +36,13 @@ public class Drug extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "drugbox_id")
     private Drugbox drugbox;
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
 }
