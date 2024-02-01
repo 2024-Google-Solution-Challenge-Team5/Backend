@@ -1,5 +1,7 @@
 package com.drugbox.service;
 
+import com.drugbox.domain.DrugInfo;
+import com.drugbox.repository.DrugInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,7 +31,9 @@ public class DrugApiService {
     @Value("${application.spring.api.url}")
     private String url;
 
-    public String getDrugInfo(String drugName) throws IOException, ParseException {
+    private final DrugInfoRepository drugInfoRepository;
+
+    public void getDrugInfo(String drugName) throws IOException, ParseException {
         URL url = new URL(createUrlForDrugDetail(drugName));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -48,7 +53,7 @@ public class DrugApiService {
         rd.close();
         conn.disconnect();
         String result = sb.toString();
-        return parseDrugEffect(result);
+        parseDrugInfo(result);
     }
 
     public String createUrlForDrugDetail(String name) throws IOException{
@@ -60,12 +65,22 @@ public class DrugApiService {
         return urlBuilder.toString();
     }
 
-    public String parseDrugEffect(String json) throws ParseException {
+    public void parseDrugInfo(String json) throws ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
         JSONObject object = (JSONObject) jsonObject.get("body");
         JSONArray array =(JSONArray) object.get("items");
-        JSONObject getEffect = (JSONObject) array.get(0);
-        return (String) getEffect.get("efcyQesitm");
+        JSONObject getInfo = (JSONObject) array.get(0);
+        addDrugInfo(getInfo);
     }
+
+    public void addDrugInfo(JSONObject getInfo){
+        DrugInfo drugInfo = DrugInfo.builder()
+                .name((String)getInfo.get(""))
+                .effect((String) getInfo.get("efcyQesitm"))
+                .updateDate((LocalDate) getInfo.get(""))
+                .build();
+        drugInfoRepository.save(drugInfo);
+    }
+
 }

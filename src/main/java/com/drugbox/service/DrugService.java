@@ -3,6 +3,7 @@ package com.drugbox.service;
 import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.domain.Drug;
+import com.drugbox.domain.DrugInfo;
 import com.drugbox.domain.Drugbox;
 import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
@@ -10,6 +11,7 @@ import com.drugbox.dto.request.DrugUseRequest;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugListResponse;
 import com.drugbox.dto.response.DrugResponse;
+import com.drugbox.repository.DrugInfoRepository;
 import com.drugbox.repository.DrugRepository;
 import com.drugbox.repository.DrugboxRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,10 +34,13 @@ import java.util.stream.Collectors;
 public class DrugService {
     private final DrugRepository drugRepository;
     private final DrugboxRepository drugboxRepository;
+    private final DrugInfoRepository drugInfoRepository;
+
     private final DrugApiService drugApiService;
 
+
     // 의약품 추가하기
-    public List<Long> addDrug(DrugRequest request){
+    public List<Long> addDrug(DrugRequest request) throws IOException, ParseException {
         Drugbox drugbox = getDrugboxOrThrow(request.getDrugboxId());
         List<Long> ids = new ArrayList<>();
         for(int i=0;i<request.getDetail().size();i++){
@@ -53,6 +59,8 @@ public class DrugService {
             drugs.add(drug);
             drugbox.setDrugs(drugs);
             drugboxRepository.save(drugbox);
+
+            checkDrugInfoSave(request.getName());
 
             ids.add(drug.getId());
         }
@@ -122,11 +130,11 @@ public class DrugService {
                     .build();
             drugListResponses.add(drugListResponse);
         }
-
+        DrugInfo drugInfo = getDrugInfoOrThrow(name);
         return DrugDetailResponse.builder()
                 .name(name)
                 .drugListResponseList(drugListResponses)
-                .effect(drugApiService.getDrugInfo(name))
+                .effect(drugInfo.getEffect())
                 .build();
     }
 
@@ -144,6 +152,18 @@ public class DrugService {
     private Drug getDrugOrThrowById(Long drugId){
         return drugRepository.findById(drugId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUG));
+    }
+
+    private DrugInfo getDrugInfoOrThrow(String name){
+        return drugInfoRepository.findByName(name)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGINFO));
+    }
+
+    private void checkDrugInfoSave(String name) throws IOException, ParseException {
+        Optional<DrugInfo> drugInfo = drugInfoRepository.findByName(name);
+        if(drugInfo.isEmpty()){
+            drugApiService.getDrugInfo(name);
+        }
     }
 
     public DrugResponse DrugToDrugResponse(Drug drug){

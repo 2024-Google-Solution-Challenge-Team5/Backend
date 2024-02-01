@@ -35,7 +35,6 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-
-api:
-  url: ${application.spring.api.url}
-  key: ${application.spring.api.key}
+  api:
+    url: ${application.spring.api.url}
+    key: ${application.spring.api.key}
