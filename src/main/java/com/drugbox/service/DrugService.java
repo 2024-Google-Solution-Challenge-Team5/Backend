@@ -9,7 +9,6 @@ import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
 import com.drugbox.dto.request.DrugUseRequest;
 import com.drugbox.dto.response.DrugDetailResponse;
-import com.drugbox.dto.response.DrugListResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.repository.DrugInfoRepository;
 import com.drugbox.repository.DrugRepository;
@@ -121,19 +120,21 @@ public class DrugService {
                 .filter(drug -> name.equals(drug.getName()))
                 .collect(Collectors.toList());
 
-        List<DrugListResponse> drugListResponses = new ArrayList<>();
+        List<DrugResponse> drugResponses = new ArrayList<>();
         for(Drug result : results){
-            DrugListResponse drugListResponse = DrugListResponse.builder()
+            DrugResponse drugResponse = DrugResponse.builder()
+                    .id(result.getId())
+                    .name(name)
                     .location(result.getLocation())
                     .count(result.getCount())
                     .expDate(result.getExpDate())
                     .build();
-            drugListResponses.add(drugListResponse);
+            drugResponses.add(drugResponse);
         }
         DrugInfo drugInfo = getDrugInfoOrThrow(name);
         return DrugDetailResponse.builder()
                 .name(name)
-                .drugListResponseList(drugListResponses)
+                .drugResponseList(drugResponses)
                 .effect(drugInfo.getEffect())
                 .build();
     }

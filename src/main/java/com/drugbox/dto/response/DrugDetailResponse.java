@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 public class DrugDetailResponse {
     private String name;
-    private List<DrugListResponse> drugListResponseList;
+    private List<DrugResponse> drugResponseList;
     private String effect;
 }
