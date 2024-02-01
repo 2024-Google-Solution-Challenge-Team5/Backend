@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class DrugInfo extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "drugInfo_id")
+    @Column(name = "druginfo_id")
     private Long id;
 
     private String name;
