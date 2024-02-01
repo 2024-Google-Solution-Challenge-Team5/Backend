@@ -1,10 +1,12 @@
 package com.drugbox.service;
 
+import com.drugbox.domain.Drug;
 import com.drugbox.domain.DrugInfo;
 import com.drugbox.repository.DrugInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.util.Iterator;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,7 +37,7 @@ public class DrugApiService {
 
     private final DrugInfoRepository drugInfoRepository;
 
-    public void getDrugInfo(String drugName) throws IOException, ParseException {
+    public String getDrugApi(String drugName) throws IOException{
         URL url = new URL(createUrlForDrugDetail(drugName));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -52,8 +56,12 @@ public class DrugApiService {
         }
         rd.close();
         conn.disconnect();
-        String result = sb.toString();
-        parseDrugInfo(result);
+        return sb.toString();
+    }
+
+    public void getDrugInfo(String drugName) throws IOException, ParseException{
+        String result = getDrugApi(drugName);
+        addDrugInfo(parseDrugInfo(result));
     }
 
     public String createUrlForDrugDetail(String name) throws IOException{
@@ -65,13 +73,12 @@ public class DrugApiService {
         return urlBuilder.toString();
     }
 
-    public void parseDrugInfo(String json) throws ParseException {
+    public JSONObject parseDrugInfo(String json) throws ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
         JSONObject object = (JSONObject) jsonObject.get("body");
         JSONArray array =(JSONArray) object.get("items");
-        JSONObject getInfo = (JSONObject) array.get(0);
-        addDrugInfo(getInfo);
+        return (JSONObject) array.get(0);
     }
 
     public void addDrugInfo(JSONObject getInfo){
@@ -81,6 +88,21 @@ public class DrugApiService {
                 .updateDate((LocalDate) getInfo.get(""))
                 .build();
         drugInfoRepository.save(drugInfo);
+    }
+
+    @Scheduled(cron="0 0 0 */14 * ?")
+    public void checkDrugInfoUpdate() throws IOException, ParseException {
+        List<DrugInfo> drugInfos = drugInfoRepository.findAll();
+        for (Iterator<DrugInfo> iterator = drugInfos.iterator(); iterator.hasNext();) {
+            DrugInfo drugInfo = iterator.next();
+            String result = getDrugApi(drugInfo.getName());
+            JSONObject jsonObject = parseDrugInfo(result);
+            LocalDate updateDate = (LocalDate) jsonObject.get("updateDe");
+
+            if(!updateDate.isEqual(drugInfo.getUpdateDate())){
+                addDrugInfo(jsonObject);
+            }
+        }
     }
 
 }
