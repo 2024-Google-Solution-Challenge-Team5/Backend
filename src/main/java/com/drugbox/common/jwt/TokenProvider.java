@@ -2,6 +2,7 @@ package com.drugbox.common.jwt;
 
 import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
+import com.drugbox.common.Util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
@@ -16,12 +17,15 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class TokenProvider {
+
+    private final RedisUtil redisUtil;
 
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
@@ -32,7 +36,8 @@ public class TokenProvider {
 
     private final Key key;
 
-    public TokenProvider(@Value("${application.jwt.secret}") String secretKey) {
+    public TokenProvider(@Value("${application.jwt.secret}") String secretKey, RedisUtil redisUtil) {
+        this.redisUtil = redisUtil;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -44,10 +49,10 @@ public class TokenProvider {
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-
-        // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
+
+        // Access Token 생성
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())       // payload "sub": "userId"
                 .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
@@ -63,17 +68,45 @@ public class TokenProvider {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
+        // redis에 refreshToken 저장
+        redisUtil.setDataExpire(authentication.getName(), refreshToken, refreshTokenExpiresIn.getTime());
+
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
                 .refreshToken(refreshToken)
+                .refreshTokenExpiresIn(refreshTokenExpiresIn.getTime())
                 .build();
     }
 
-    public Authentication getAuthentication(String accessToken) {
+    public TokenDto generateAccessToken(Authentication authentication) {
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
+        // Access Token 생성
+        String accessToken = Jwts.builder()
+                .setSubject(authentication.getName())       // payload "sub": "userId"
+                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
+                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
+                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
+                .compact();
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .build();
+    }
+
+    public Authentication getAuthentication(String token) {
         // 토큰 복호화
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(token);
 
         if (claims.get(AUTHORITIES_KEY) == null) {
             log.info("권한 정보가 없는 토큰입니다.");
@@ -116,6 +149,34 @@ public class TokenProvider {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
+        }
+    }
+
+    public String parseSubject(String accessToken) {
+        validateToken(accessToken);
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody().getSubject();
+        } catch (JwtException e){
+            log.info("유효하지 않은 JWT 토큰 입니다");
+            throw new CustomException(ErrorCode.TOKEN_INVALID);
+        }
+    }
+
+    public void deleteRefreshToken(String accessToken) {
+        String userId = parseSubject(accessToken);
+        String data = redisUtil.getData(userId);
+        if (data == null) {
+            throw new CustomException(ErrorCode.NOT_FOUND_REFRESH_TOKEN);
+        }
+        redisUtil.deleteData(userId);
+    }
+
+    public void findRefreshToken(String refreshToken){
+        String id = parseSubject(refreshToken);
+        String data = redisUtil.getData(id);
+        if (!data.equals(refreshToken)) {
+            log.info("Refresh Token Exception");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_REFRESH_TOKEN);
         }
     }
 }

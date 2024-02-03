@@ -30,6 +30,11 @@ spring:
         project-id: ${application.spring.cloud.gcp.storage.project-id}
         bucket: ${application.spring.cloud.gcp.storage.bucket}
 
+  data:
+    redis:
+      port: ${spring.data.redis.port}
+      host: ${spring.data.redis.host}
+
   servlet:
     multipart:
       max-file-size: 10MB
