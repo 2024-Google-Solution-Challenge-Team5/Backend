@@ -38,3 +38,11 @@ spring:
   api:
     url: ${application.spring.api.url}
     key: ${application.spring.api.key}
+
+logging:
+  level:
+    com.drugbox.common: debug
+
+jwt:
+  secret: ${application.jwt.secret}
+  secret_refresh: ${application.jwt.secret_refresh}

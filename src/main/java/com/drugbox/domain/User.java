@@ -22,6 +22,10 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Authority authority;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
     private List<UserDrugbox> userDrugboxes = new ArrayList<>();
