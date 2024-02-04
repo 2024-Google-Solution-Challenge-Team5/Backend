@@ -38,8 +38,8 @@ public class DrugboxService {
 
 
     // 구급상자 추가하기 (생성)
-    public Long addDrugbox(DrugboxSaveRequest request) throws IOException {
-        User user = getUserOrThrow(request.getUserId());
+    public Long addDrugbox(DrugboxSaveRequest request, Long userId) throws IOException {
+        User user = getUserOrThrow(userId);
         String imageUUID = checkImageUUID(request.getImage());
         Drugbox drugbox = Drugbox.createDrugbox(request.getName(), imageUUID);
         drugboxRepository.save(drugbox);

@@ -30,7 +30,7 @@ public class DrugboxController {
     // 구급상자 추가하기 (생성)
     @PostMapping("/add")
     public ResponseEntity<IdResponse> addDrugbox(@Valid DrugboxSaveRequest request) throws IOException {
-        Long drugboxId = drugboxService.addDrugbox(request);
+        Long drugboxId = drugboxService.addDrugbox(request, SecurityUtil.getCurrentUserId());
         IdResponse response = IdResponse.builder()
                 .id(drugboxId)
                 .build();
