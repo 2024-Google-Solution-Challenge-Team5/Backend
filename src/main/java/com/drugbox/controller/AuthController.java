@@ -1,16 +1,15 @@
 package com.drugbox.controller;
 
 import com.drugbox.common.jwt.TokenDto;
+import com.drugbox.common.oauth.platform.google.GoogleLoginParams;
 import com.drugbox.dto.request.UserLoginRequest;
 import com.drugbox.dto.response.IdResponse;
 import com.drugbox.service.AuthService;
+import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -21,7 +20,23 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/signup")
+    @PostMapping("login/google")
+    public ResponseEntity<TokenDto> googleLogin(@RequestBody GoogleLoginParams params){ // auth code
+        return ResponseEntity.ok(authService.googleLogin(params));
+    }
+
+    @GetMapping("/redirect/google") // 백엔드 자체 테스트용
+    public ResponseEntity<TokenDto> googleRedirect(@RequestParam("code") String authCode){
+        return ResponseEntity.ok(authService.getGoogleAccessToken(authCode));
+    }
+
+    @GetMapping("/redirect/google/2") // 백엔드 자체 테스트용
+    public ResponseEntity<GoogleLoginParams> getCodeFromGoogleRedirect(@RequestParam("code") String authCode){
+        GoogleLoginParams response = GoogleLoginParams.builder().authorizationCode(authCode).build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/signup/pw")
     public ResponseEntity<IdResponse> signup(@RequestBody UserLoginRequest userLoginRequest) {
         Long userId = authService.signup(userLoginRequest);
         IdResponse response = IdResponse.builder()
@@ -30,7 +45,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login/pw")
     public ResponseEntity<TokenDto> login(@RequestBody UserLoginRequest userLoginRequest) {
         return ResponseEntity.ok(authService.login(userLoginRequest));
     }

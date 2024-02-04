@@ -30,6 +30,21 @@ spring:
         project-id: ${application.spring.cloud.gcp.storage.project-id}
         bucket: ${application.spring.cloud.gcp.storage.bucket}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${spring.security.oauth2.client.registration.google.client-id}
+            client-secret: ${spring.security.oauth2.client.registration.google.client-secret}
+            redirect-uri: http://localhost:8080/auth/redirect/google
+            authorization-grant-type: authorization_code
+            client-authentication-method: POST
+            client-name: Google
+            scope:
+              - profile
+              - email
+
   data:
     redis:
       port: ${spring.data.redis.port}

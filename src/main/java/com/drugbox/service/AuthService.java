@@ -4,6 +4,12 @@ import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.common.jwt.TokenDto;
 import com.drugbox.common.jwt.TokenProvider;
+import com.drugbox.common.oauth.OAuthInfoResponse;
+import com.drugbox.common.oauth.OAuthLoginParams;
+import com.drugbox.common.oauth.OAuthProvider;
+import com.drugbox.common.oauth.RequestOAuthInfoService;
+import com.drugbox.common.oauth.dto.OAuthUserProfile;
+import com.drugbox.common.oauth.platform.google.GoogleLoginParams;
 import com.drugbox.domain.User;
 import com.drugbox.dto.request.UserLoginRequest;
 import com.drugbox.repository.UserRepository;
@@ -16,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -27,7 +35,53 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final RequestOAuthInfoService requestOAuthInfoService;
 
+    public TokenDto googleLogin(OAuthLoginParams params){
+        OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
+        Map<String, Object> idAndIsNew = findOrCreateUser(oAuthInfoResponse);
+        Long userId = (Long) idAndIsNew.get("userId");
+        Boolean isNewUser = (Boolean) idAndIsNew.get("isNewUser");
+        TokenDto token = tokenProvider.generateTokenDto(userId.toString());
+        token.setIsNewUser(isNewUser);
+        return token;
+    }
+
+    private Map<String, Object> findOrCreateUser(OAuthInfoResponse oAuthInfoResponse) {
+        OAuthUserProfile profile = tokenProvider.parseIdToken(oAuthInfoResponse.getIdToken());
+
+        Map<String, Object> idAndIfNew = new HashMap<>();
+        Boolean isNewUser = false;
+        User user = userRepository.findByOauthId(profile.getOauthId());
+        if (user == null){
+            user = newUser(profile, oAuthInfoResponse.getOAuthProvider());
+            isNewUser = true;
+        }
+        user.setProviderAccessToken(oAuthInfoResponse.getAccessToken());
+        userRepository.save(user);
+
+        Long userId = user.getId();
+        idAndIfNew.put("userId", userId);
+        idAndIfNew.put("isNewUser", isNewUser);
+        return idAndIfNew;
+    }
+
+    private User newUser(OAuthUserProfile profile, OAuthProvider provider) {
+        User user = User.builder()
+                .email(profile.getEmail())
+                .nickname(profile.getNickname())
+                .image(profile.getImage())
+                .oauthProvider(provider)
+                .oauthId(profile.getOauthId())
+                .build();
+        return userRepository.save(user);
+    }
+
+    public TokenDto getGoogleAccessToken(String authCode){
+        System.out.println("\n==== Auth Code:"+authCode+"\n");
+        GoogleLoginParams params = new GoogleLoginParams(authCode);
+        return googleLogin(params);
+    }
 
     public Long signup(UserLoginRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {

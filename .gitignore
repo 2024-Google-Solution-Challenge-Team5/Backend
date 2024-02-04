@@ -39,3 +39,4 @@ out/
 ### classpath ###
 application.properties
 google-cloud.json
+google-oauth.json

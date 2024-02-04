@@ -3,6 +3,9 @@ package com.drugbox.common.jwt;
 import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.common.Util.RedisUtil;
+import com.drugbox.common.oauth.dto.OAuthUserProfile;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
@@ -15,9 +18,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.security.Key;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,10 +46,15 @@ public class TokenProvider {
     private long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${application.jwt.refresh_token.duration}")
     private long REFRESH_TOKEN_EXPIRE_TIME;
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String CLIENT_ID;
+    private static final String GOOGLE_KEY_URL = "https://www.googleapis.com/oauth2/v3/certs";
+
 
     private final Key key;
 
-    public TokenProvider(@Value("${application.jwt.secret}") String secretKey, RedisUtil redisUtil) {
+    public TokenProvider(@Value("${application.jwt.secret}") String secretKey,
+                         RedisUtil redisUtil) {
         this.redisUtil = redisUtil;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -70,6 +88,39 @@ public class TokenProvider {
 
         // redis에 refreshToken 저장
         redisUtil.setDataExpire(authentication.getName(), refreshToken, refreshTokenExpiresIn.getTime());
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .refreshToken(refreshToken)
+                .refreshTokenExpiresIn(refreshTokenExpiresIn.getTime())
+                .build();
+    }
+
+    public TokenDto generateTokenDto(String userId) {
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
+
+        // Access Token 생성
+        String accessToken = Jwts.builder()
+                .setSubject(userId)       // payload "sub": "userId"
+                .claim(AUTHORITIES_KEY, "ROLE_USER")        // payload "auth": "ROLE_USER"
+                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
+                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
+                .compact();
+
+        // Refresh Token 생성
+        String refreshToken = Jwts.builder()
+                .setSubject(userId)
+                .claim(AUTHORITIES_KEY, "ROLE_USER")
+                .setExpiration(refreshTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        // redis에 refreshToken 저장
+        redisUtil.setDataExpire(userId, refreshToken, refreshTokenExpiresIn.getTime());
 
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
@@ -177,6 +228,29 @@ public class TokenProvider {
         if (!data.equals(refreshToken)) {
             log.info("Refresh Token Exception");
             throw new CustomException(ErrorCode.UNAUTHORIZED_REFRESH_TOKEN);
+        }
+    }
+
+    public OAuthUserProfile parseIdToken(String idToken) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                    .setAudience(Collections.singletonList(CLIENT_ID))
+                    .build();
+
+            GoogleIdToken token = verifier.verify(idToken);
+            if (token != null) {
+                Payload payload = token.getPayload();
+                return OAuthUserProfile.builder()
+                            .email(payload.getEmail())
+                            .nickname(payload.get("name").toString())
+                            .image(payload.get("picture").toString())
+                            .oauthId(payload.getSubject())
+                            .build();
+            }
+            throw new CustomException(ErrorCode.ID_TOKEN_INVALID);
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.ID_TOKEN_INVALID);
         }
     }
 }
