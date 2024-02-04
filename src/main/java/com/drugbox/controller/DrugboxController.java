@@ -1,5 +1,6 @@
 package com.drugbox.controller;
 
+import com.drugbox.common.auth.SecurityUtil;
 import com.drugbox.dto.request.DrugboxImageChangeRequest;
 import com.drugbox.dto.request.DrugboxSaveRequest;
 import com.drugbox.dto.response.DrugboxResponse;
@@ -39,9 +40,8 @@ public class DrugboxController {
 
     // 구급상자 추가하기 (초대)
     @PostMapping("/add/invite-code")
-    public ResponseEntity<IdResponse> addDrugboxByInviteCode(@RequestParam(value="inviteCode") String inviteCode,
-                                                                    @RequestParam(value="userId") Long userId) throws IOException {
-        Long drugboxId = drugboxService.addDrugboxByInviteCode(inviteCode, userId);
+    public ResponseEntity<IdResponse> addDrugboxByInviteCode(@RequestParam(value="inviteCode") String inviteCode) throws IOException {
+        Long drugboxId = drugboxService.addDrugboxByInviteCode(inviteCode, SecurityUtil.getCurrentUserId());
         IdResponse response = IdResponse.builder()
                 .id(drugboxId)
                 .build();
@@ -50,8 +50,8 @@ public class DrugboxController {
 
     // 내 구급상자 리스트 조회
     @GetMapping("/user")
-    public ResponseEntity<List<DrugboxResponse>> getUserDrugboxes(@RequestParam(value="userId") Long userId) {
-        List<DrugboxResponse> response = drugboxService.getUserDrugboxes(userId);
+    public ResponseEntity<List<DrugboxResponse>> getUserDrugboxes() {
+        List<DrugboxResponse> response = drugboxService.getUserDrugboxes(SecurityUtil.getCurrentUserId());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -87,9 +87,8 @@ public class DrugboxController {
 
     // 구급상자 초대 수락하기
     @PostMapping("/invite/accept")
-    public ResponseEntity<Void> acceptInvitation(@RequestParam(value="drugboxId") Long drugboxId,
-                                                 @RequestParam(value="userId") Long userId){
-        drugboxService.acceptInvitation(drugboxId, userId);
+    public ResponseEntity<Void> acceptInvitation(@RequestParam(value="drugboxId") Long drugboxId){
+        drugboxService.acceptInvitation(drugboxId, SecurityUtil.getCurrentUserId());
         return new ResponseEntity(HttpStatus.OK);
     }
 }
