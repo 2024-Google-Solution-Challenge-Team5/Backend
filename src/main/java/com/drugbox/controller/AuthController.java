@@ -27,13 +27,8 @@ public class AuthController {
 
     @GetMapping("/redirect/google") // 백엔드 자체 테스트용
     public ResponseEntity<TokenDto> googleRedirect(@RequestParam("code") String authCode){
-        return ResponseEntity.ok(authService.getGoogleAccessToken(authCode));
-    }
-
-    @GetMapping("/redirect/google/2") // 백엔드 자체 테스트용
-    public ResponseEntity<GoogleLoginParams> getCodeFromGoogleRedirect(@RequestParam("code") String authCode){
-        GoogleLoginParams response = GoogleLoginParams.builder().authorizationCode(authCode).build();
-        return ResponseEntity.ok(response);
+//        return ResponseEntity.ok(authService.getGoogleAccessToken(authCode));
+        System.out.println("\n  AuthCode:" + authCode); return null;
     }
 
     @PostMapping("/signup/pw")
