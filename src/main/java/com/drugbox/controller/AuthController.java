@@ -56,4 +56,10 @@ public class AuthController {
         authService.logout(accessToken.get("accessToken"));
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PostMapping("/quit")
+    public ResponseEntity<Void> quit(@RequestBody Map<String, String> accessToken){
+        authService.quit(accessToken.get("accessToken"));
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

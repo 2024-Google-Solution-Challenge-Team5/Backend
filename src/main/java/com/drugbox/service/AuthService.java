@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RequestOAuthInfoService requestOAuthInfoService;
+    private final EntityManager em;
 
     public TokenDto googleLogin(OAuthLoginParams params){
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
@@ -126,5 +128,16 @@ public class AuthService {
 
     public void logout(String accessToken){
         tokenProvider.deleteRefreshToken(accessToken);
+    }
+
+    public void quit(String accessToken){
+        String userId = tokenProvider.parseSubject(accessToken);
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        if(user.getOauthProvider() == OAuthProvider.GOOGLE){ // 연동 해제
+            requestOAuthInfoService.quit(user.getProviderAccessToken(), OAuthProvider.GOOGLE);
+        }
+        tokenProvider.deleteRefreshToken(accessToken);
+        userRepository.delete(user);
     }
 }

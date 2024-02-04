@@ -22,4 +22,9 @@ public class RequestOAuthInfoService { // OAuthApiClient 를 사용하는 Servic
         OAuthApiClient client = clients.get(params.oAuthProvider());
         return client.requestAccessToken(params);
     }
+
+    public void quit(String accessToken, OAuthProvider oauthProvider){
+        OAuthApiClient client = clients.get(oauthProvider);
+        client.quit(accessToken);
+    }
 }

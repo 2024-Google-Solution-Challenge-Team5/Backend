@@ -1,14 +1,15 @@
 package com.drugbox.common.oauth.platform.google;
 
+import com.drugbox.common.exception.CustomException;
+import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.common.oauth.OAuthApiClient;
 import com.drugbox.common.oauth.OAuthLoginParams;
 import com.drugbox.common.oauth.OAuthProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -63,5 +64,20 @@ public class GoogleApiClient implements OAuthApiClient { // 구글 로그인 토
 
         GoogleInfoResponse ret = new GoogleInfoResponse(response.getAccessToken(), response.getIdToken());
         return ret;
+    }
+
+    @Override
+    public void quit(String accessToken){ // 구글에서 발급한 accessToken revoke 신청
+        String url = authUrl + "/revoke?token=" + accessToken;
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        HttpEntity<?> request = new HttpEntity<>(body, httpHeaders);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request,String.class);
+        if(response.getStatusCode() != HttpStatus.OK){
+            throw new CustomException(ErrorCode.QUIT_ERROR);
+        }
     }
 }
