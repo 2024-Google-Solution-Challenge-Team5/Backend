@@ -85,7 +85,7 @@ public class DrugApiService {
         DrugInfo drugInfo = DrugInfo.builder()
                 .name((String)getInfo.get("itemName"))
                 .effect((String) getInfo.get("efcyQesitm"))
-                .updateDate((LocalDate) getInfo.get("updateDe"))
+                .updateDate(LocalDate.parse((String)getInfo.get("updateDe")))
                 .build();
         drugInfoRepository.save(drugInfo);
     }
@@ -98,7 +98,7 @@ public class DrugApiService {
             String result = getDrugApi(createUrlForDrugDetail(drugInfo.getName()));
             JSONArray array = parseDrugInfo(result);
             JSONObject jsonObject = (JSONObject) array.get(0);
-            LocalDate updateDate = (LocalDate) jsonObject.get("updateDe");
+            LocalDate updateDate = LocalDate.parse((String)jsonObject.get("updateDe"));
 
             if(!updateDate.isEqual(drugInfo.getUpdateDate())){
                 addDrugInfo(array);
