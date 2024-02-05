@@ -12,8 +12,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class DrugboxSaveRequest {
     @NotNull
-    private Long userId;
-    @NotNull
     private String name;
     private MultipartFile image;
 }
