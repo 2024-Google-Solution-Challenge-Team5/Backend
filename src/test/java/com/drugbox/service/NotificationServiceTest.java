@@ -1,37 +1,31 @@
 package com.drugbox.service;
 
+import com.drugbox.domain.User;
 import com.drugbox.domain.Notification;
 import com.drugbox.repository.NotificationRepository;
 import com.drugbox.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.drugbox.domain.User;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 public class NotificationServiceTest {
 
-    @Autowired
-    NotificationRepository notificationRepository;
-    @Autowired
-    UserRepository userRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired NotificationRepository notificationRepository;
+    @Autowired UserRepository userRepository;
+    @Autowired EntityManager entityManager;
 
     @Test
-    @DirtiesContext
-    @DisplayName("유저_삭제후_알림_삭제")
-    void deleteCascadeNotificationTest() throws Exception {
+    public void deleteCascadeNotificationTest() throws Exception {
         // given
         long ucnt = userRepository.count();
         long ncnt = notificationRepository.count();
