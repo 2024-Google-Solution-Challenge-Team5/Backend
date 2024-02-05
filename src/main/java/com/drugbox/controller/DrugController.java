@@ -5,6 +5,7 @@ import com.drugbox.dto.request.DrugUseRequest;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.dto.response.IdResponse;
+import com.drugbox.service.DrugApiService;
 import com.drugbox.service.DrugService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("drugs")
 public class DrugController {
     private final DrugService drugService;
+    private final DrugApiService drugApiService;
 
     @GetMapping("/list")
     public ResponseEntity<List<DrugResponse>> getDrugs(@RequestParam(value="drugboxId") Long drugboxId) {
@@ -58,6 +60,12 @@ public class DrugController {
     public ResponseEntity<DrugDetailResponse> getDrugDetail(@RequestParam(value="drugboxId") Long drugboxId,
                                               @RequestParam(value="name") String name) throws IOException, ParseException {
         DrugDetailResponse response = drugService.getDrugDetail(drugboxId,name);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<String>> searchDrugs(@RequestParam(value="name") String name) throws IOException, ParseException {
+        List<String> response = drugApiService.getSearchDrugs(name);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

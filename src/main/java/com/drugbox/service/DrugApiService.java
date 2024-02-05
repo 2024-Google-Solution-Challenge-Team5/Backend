@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,8 +38,7 @@ public class DrugApiService {
 
     private final DrugInfoRepository drugInfoRepository;
 
-    public String getDrugApi(String drugName) throws IOException{
-        URL url = new URL(createUrlForDrugDetail(drugName));
+    public String getDrugApi(URL url) throws IOException{
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Content-type", "application/json");
@@ -60,32 +60,32 @@ public class DrugApiService {
     }
 
     public void getDrugInfo(String drugName) throws IOException, ParseException{
-        String result = getDrugApi(drugName);
+        String result = getDrugApi(createUrlForDrugDetail(drugName));
         addDrugInfo(parseDrugInfo(result));
     }
 
-    public String createUrlForDrugDetail(String name) throws IOException{
+    public URL createUrlForDrugDetail(String name) throws IOException{
         StringBuilder urlBuilder = new StringBuilder(url); // api url
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=" + key); // api key
         urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); // 검색 결과 개수
         urlBuilder.append("&" + URLEncoder.encode("itemName","UTF-8") + "=" + URLEncoder.encode(name, "UTF-8")); // 찾는 의약품 이름
         urlBuilder.append("&" + URLEncoder.encode("type","UTF-8") + "=" + URLEncoder.encode("json", "UTF-8")); // xml,json 중 json
-        return urlBuilder.toString();
+        return new URL(urlBuilder.toString());
     }
 
-    public JSONObject parseDrugInfo(String json) throws ParseException {
+    public JSONArray parseDrugInfo(String json) throws ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
         JSONObject object = (JSONObject) jsonObject.get("body");
-        JSONArray array =(JSONArray) object.get("items");
-        return (JSONObject) array.get(0);
+        return (JSONArray) object.get("items");
     }
 
-    public void addDrugInfo(JSONObject getInfo){
+    public void addDrugInfo(JSONArray array){
+        JSONObject getInfo = (JSONObject) array.get(0);
         DrugInfo drugInfo = DrugInfo.builder()
-                .name((String)getInfo.get(""))
+                .name((String)getInfo.get("itemName"))
                 .effect((String) getInfo.get("efcyQesitm"))
-                .updateDate((LocalDate) getInfo.get(""))
+                .updateDate(LocalDate.parse((String)getInfo.get("updateDe")))
                 .build();
         drugInfoRepository.save(drugInfo);
     }
@@ -95,14 +95,35 @@ public class DrugApiService {
         List<DrugInfo> drugInfos = drugInfoRepository.findAll();
         for (Iterator<DrugInfo> iterator = drugInfos.iterator(); iterator.hasNext();) {
             DrugInfo drugInfo = iterator.next();
-            String result = getDrugApi(drugInfo.getName());
-            JSONObject jsonObject = parseDrugInfo(result);
-            LocalDate updateDate = (LocalDate) jsonObject.get("updateDe");
+            String result = getDrugApi(createUrlForDrugDetail(drugInfo.getName()));
+            JSONArray array = parseDrugInfo(result);
+            JSONObject jsonObject = (JSONObject) array.get(0);
+            LocalDate updateDate = LocalDate.parse((String)jsonObject.get("updateDe"));
 
             if(!updateDate.isEqual(drugInfo.getUpdateDate())){
-                addDrugInfo(jsonObject);
+                addDrugInfo(array);
             }
         }
+    }
+
+    // 약 이름으로 검색하기
+    public List<String> getSearchDrugs(String name) throws IOException, ParseException {
+        String result = getDrugApi(createUrlForSearchDrugs(name));
+        JSONArray array = parseDrugInfo(result);
+        List<String> drugs = new ArrayList<>();
+        for (Object o : array) {
+            JSONObject jsonObject = (JSONObject) o;
+            drugs.add((String) jsonObject.get("itemName"));
+        }
+        return drugs;
+    }
+
+    public URL createUrlForSearchDrugs(String name) throws IOException{
+        StringBuilder urlBuilder = new StringBuilder(url); // api url
+        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=" + key); // api key
+        urlBuilder.append("&" + URLEncoder.encode("itemName","UTF-8") + "=" + URLEncoder.encode(name, "UTF-8")); // 찾는 의약품 이름
+        urlBuilder.append("&" + URLEncoder.encode("type","UTF-8") + "=" + URLEncoder.encode("json", "UTF-8")); // xml,json 중 json
+        return new URL(urlBuilder.toString());
     }
 
 }
