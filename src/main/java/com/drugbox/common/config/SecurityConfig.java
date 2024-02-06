@@ -33,12 +33,17 @@ public class SecurityConfig {
     // h2 database 테스트가 원활하도록 관련 API 들은 전부 무시
     private static final String[] WHITE_LIST = {
             "/h2-console/**", "/favicon.ico",
-            /* Swagger */
-            "v3/api-docs/**",
+            /* -- Swagger UI v2 */
+            "/v2/api-docs",
             "/swagger-resources",
             "/swagger-resources/**",
-            "/swagger-ui/**",
+            "/configuration/ui",
+            "/configuration/security",
             "/swagger-ui.html",
+            "/webjars/**",
+            /* -- Swagger UI v3 (OpenAPI) */
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
             /* Auth */
             "/auth/**"
     };
