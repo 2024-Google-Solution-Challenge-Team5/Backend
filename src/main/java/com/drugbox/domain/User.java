@@ -42,7 +42,10 @@ public class User extends BaseEntity {
     private String nickname;
     private String email;
     private String image;
+    @Builder.Default
+    private int point = 0;
 
     public void setProviderAccessToken(String token){ this.providerAccessToken = token; }
     public void setImage(String image){ this.image = image; }
+    public void add100Point(){ this.point += 100;}
 }
