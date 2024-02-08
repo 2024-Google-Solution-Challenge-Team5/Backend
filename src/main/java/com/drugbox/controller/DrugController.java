@@ -29,7 +29,7 @@ public class DrugController {
 
     @GetMapping("/list")
     public ResponseEntity<List<DrugResponse>> getDrugs(@RequestParam(value="drugboxId") Long drugboxId) {
-        List<DrugResponse> response = drugService.getDrugList(drugboxId);
+        List<DrugResponse> response = drugService.getDrugs(drugboxId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

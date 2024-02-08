@@ -68,11 +68,13 @@ public class DrugService {
     }
 
     // 의약품 리스트 확인하기
-    public List<DrugResponse> getDrugList(Long DrugboxId){
+    public List<DrugResponse> getDrugs(Long DrugboxId){
         Drugbox drugbox = getDrugboxOrThrow(DrugboxId);
-        List<Drug> list = drugbox.getDrugs();
-        return list.stream()
-                .map(drug-> DrugToDrugResponse(getDrugOrThrow(drug)))
+        List<Drug> drugs = drugbox.getDrugs();
+        return drugs.stream()
+                .map(drug -> getDrugOrThrow(drug))
+                .filter(drug -> !drug.isInDisposalList())
+                .map(drug-> DrugToDrugResponse(drug))
                 .collect(Collectors.toList());
     }
 
