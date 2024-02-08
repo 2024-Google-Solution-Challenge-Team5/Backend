@@ -7,7 +7,7 @@ import com.drugbox.domain.DrugInfo;
 import com.drugbox.domain.Drugbox;
 import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
-import com.drugbox.dto.request.DrugUseRequest;
+import com.drugbox.dto.request.DrugUpdateRequest;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.repository.DrugInfoRepository;
@@ -68,19 +68,21 @@ public class DrugService {
     }
 
     // 의약품 리스트 확인하기
-    public List<DrugResponse> getDrugList(Long DrugboxId){
+    public List<DrugResponse> getDrugs(Long DrugboxId){
         Drugbox drugbox = getDrugboxOrThrow(DrugboxId);
-        List<Drug> list = drugbox.getDrugs();
-        return list.stream()
-                .map(drug-> DrugToDrugResponse(getDrugOrThrow(drug)))
+        List<Drug> drugs = drugbox.getDrugs();
+        return drugs.stream()
+                .map(drug -> getDrugOrThrow(drug))
+                .filter(drug -> !drug.isInDisposalList())
+                .map(drug-> DrugToDrugResponse(drug))
                 .collect(Collectors.toList());
     }
 
     // 의약품 사용하기
-    public void useDrug(List<DrugUseRequest> drugUseRequests){
-        for(DrugUseRequest drugUseList : drugUseRequests){
-            Drugbox drugbox = getDrugboxOrThrow(drugUseList.getDrugboxId());
-            for(Long drugId : drugUseList.getDrugIds()){
+    public void useDrug(List<DrugUpdateRequest> drugUpdateRequests){
+        for(DrugUpdateRequest updateRequest : drugUpdateRequests){
+            Drugbox drugbox = getDrugboxOrThrow(updateRequest.getDrugboxId());
+            for(Long drugId : updateRequest.getDrugIds()){
                 Drug drug = getDrugOrThrowById(drugId);
                 int count = drug.getCount()-1;
 
@@ -108,7 +110,7 @@ public class DrugService {
         Drugbox drugbox = getDrugboxOrThrow(drugboxId);
         Drug drug = getDrugOrThrowById(drugId);
 
-        drug.setStatus(1);
+        drug.addToDisposalList();
         drugRepository.save(drug);
         drugboxRepository.save(drugbox);
     }
@@ -137,6 +139,22 @@ public class DrugService {
                 .drugResponseList(drugResponses)
                 .effect(drugInfo.getEffect())
                 .build();
+    }
+
+    // 폐의약품 리스트에서 약 삭제하기
+    public void deleteDrugFromDisposalList(List<DrugUpdateRequest> drugUpdateRequests){
+        for(DrugUpdateRequest updateRequest : drugUpdateRequests){
+            Drugbox drugbox = getDrugboxOrThrow(updateRequest.getDrugboxId());
+            for(Long drugId : updateRequest.getDrugIds()){
+                Drug drug = getDrugOrThrowById(drugId);
+                if(!drug.isInDisposalList()){
+                    throw new CustomException(ErrorCode.DRUG_NOT_IN_DISPOSAL_LIST);
+                }
+                drugRepository.delete(drug);
+                drugboxRepository.save(drugbox);
+            }
+        }
+
     }
 
     private Drugbox getDrugboxOrThrow(Long drugboxId) {
@@ -173,6 +191,8 @@ public class DrugService {
                 .name(drug.getName())
                 .location(drug.getLocation())
                 .expDate(drug.getExpDate())
+                .count(drug.getCount())
+                .isInDisposalList(drug.isInDisposalList())
                 .build();
     }
 }
