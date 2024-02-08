@@ -31,6 +31,7 @@ public enum ErrorCode {
     // Drug 예외
     NOT_FOUND_DRUG(HttpStatus.NOT_FOUND, "해당 약 정보를 찾을 수 없습니다."),
     NOT_FOUND_DRUGINFO(HttpStatus.NOT_FOUND, "해당 약 상세정보를 찾을 수 없습니다"),
+    DRUG_NOT_IN_DISPOSAL_LIST(HttpStatus.CONFLICT, "해당 약은 폐의약품 리스트에 없습니다."),
 
     // 이미지 예외
     IMAGE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "이미지 파일은 10MB이하여야 합니다."),

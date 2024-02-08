@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DrugUseRequest {
+public class DrugUpdateRequest {
     private Long drugboxId;
     private List<Long> drugIds;
 }
