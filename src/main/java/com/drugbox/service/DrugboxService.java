@@ -54,7 +54,7 @@ public class DrugboxService {
         User user = getUserOrThrow(userId);
         Drugbox drugbox = drugboxRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGBOX));
-
+        checkIfUserIsDrugboxMember(user, drugbox);
         UserDrugbox userDrugbox = UserDrugbox.createUserDrugbox(user, drugbox);
         userDrugboxRepository.save(userDrugbox);
         return drugbox.getId();
