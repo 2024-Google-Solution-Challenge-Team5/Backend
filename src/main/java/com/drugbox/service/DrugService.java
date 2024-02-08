@@ -173,6 +173,7 @@ public class DrugService {
                 .name(drug.getName())
                 .location(drug.getLocation())
                 .expDate(drug.getExpDate())
+                .count(drug.getCount())
                 .isInDisposalList(drug.isInDisposalList())
                 .build();
     }
