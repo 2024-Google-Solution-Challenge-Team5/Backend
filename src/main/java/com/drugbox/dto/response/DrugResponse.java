@@ -14,4 +14,5 @@ public class DrugResponse {
     private int count;
     private String location;
     private LocalDate expDate;
+    private boolean isInDisposalList;
 }

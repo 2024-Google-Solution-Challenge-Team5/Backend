@@ -108,7 +108,7 @@ public class DrugService {
         Drugbox drugbox = getDrugboxOrThrow(drugboxId);
         Drug drug = getDrugOrThrowById(drugId);
 
-        drug.setStatus(1);
+        drug.addToDisposalList();
         drugRepository.save(drug);
         drugboxRepository.save(drugbox);
     }
@@ -173,6 +173,7 @@ public class DrugService {
                 .name(drug.getName())
                 .location(drug.getLocation())
                 .expDate(drug.getExpDate())
+                .isInDisposalList(drug.isInDisposalList())
                 .build();
     }
 }

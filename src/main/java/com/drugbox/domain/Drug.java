@@ -31,7 +31,7 @@ public class Drug extends BaseEntity {
     private String location;
     private LocalDate expDate;
     @Builder.Default
-    private int status=0;
+    private boolean isInDisposalList = false;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "drugbox_id")
@@ -41,8 +41,8 @@ public class Drug extends BaseEntity {
         this.count = count;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void addToDisposalList() {
+        this.isInDisposalList = true;
     }
 
 }
