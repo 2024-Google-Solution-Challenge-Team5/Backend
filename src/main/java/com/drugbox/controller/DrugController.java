@@ -1,7 +1,7 @@
 package com.drugbox.controller;
 
 import com.drugbox.dto.request.DrugRequest;
-import com.drugbox.dto.request.DrugUseRequest;
+import com.drugbox.dto.request.DrugUpdateRequest;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.dto.response.IdResponse;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class DrugController {
 
     @GetMapping("/list")
     public ResponseEntity<List<DrugResponse>> getDrugs(@RequestParam(value="drugboxId") Long drugboxId) {
-        List<DrugResponse> response = drugService.getDrugList(drugboxId);
+        List<DrugResponse> response = drugService.getDrugs(drugboxId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -44,8 +43,8 @@ public class DrugController {
     }
 
     @PatchMapping("/use")
-    public ResponseEntity<Void> useDrugs(List<DrugUseRequest> drugUseRequests){
-        drugService.useDrug(drugUseRequests);
+    public ResponseEntity<Void> useDrugs(@RequestBody List<DrugUpdateRequest> drugUpdateRequests){
+        drugService.useDrug(drugUpdateRequests);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -67,5 +66,11 @@ public class DrugController {
     public ResponseEntity<List<String>> searchDrugs(@RequestParam(value="name") String name) throws IOException, ParseException {
         List<String> response = drugApiService.getSearchDrugs(name);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/dispose/delete")
+    public ResponseEntity<Void> deleteDrugFromDisposalList(@RequestBody List<DrugUpdateRequest> drugUpdateRequests){
+        drugService.deleteDrugFromDisposalList(drugUpdateRequests);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
