@@ -5,14 +5,14 @@ import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.domain.Drug;
 import com.drugbox.domain.DrugInfo;
 import com.drugbox.domain.Drugbox;
+import com.drugbox.domain.User;
 import com.drugbox.dto.request.DrugDetailRequest;
 import com.drugbox.dto.request.DrugRequest;
 import com.drugbox.dto.request.DrugUpdateRequest;
+import com.drugbox.dto.response.DisposalResponse;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugResponse;
-import com.drugbox.repository.DrugInfoRepository;
-import com.drugbox.repository.DrugRepository;
-import com.drugbox.repository.DrugboxRepository;
+import com.drugbox.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
@@ -34,6 +34,8 @@ public class DrugService {
     private final DrugRepository drugRepository;
     private final DrugboxRepository drugboxRepository;
     private final DrugInfoRepository drugInfoRepository;
+    private final UserRepository userRepository;
+    private final UserDrugboxRepository userDrugboxRepository;
 
     private final DrugApiService drugApiService;
 
@@ -157,6 +159,29 @@ public class DrugService {
 
     }
 
+    // 폐의약품 리스트 가져오기
+    public List<DisposalResponse> getDisposalList(Long userId){
+        getUserOrThrow(userId);
+        List<Long> ids = userDrugboxRepository.findDrugboxIdByUserId(userId);
+        List<DisposalResponse> disposalResponses = new ArrayList<>();
+        for(Long id : ids){
+            Drugbox drugbox = getDrugboxOrThrow(id);
+            List<Drug> drugs = drugbox.getDrugs();
+            List<DrugResponse> drugResponses = drugs.stream()
+                    .map(drug -> getDrugOrThrow(drug))
+                    .filter(drug -> drug.isInDisposalList())
+                    .map(drug-> DrugToDrugResponse(drug))
+                    .collect(Collectors.toList());
+
+            DisposalResponse disposalResponse = DisposalResponse.builder()
+                    .drugboxName(drugbox.getName())
+                    .drugResponses(drugResponses)
+                    .build();
+            disposalResponses.add(disposalResponse);
+        }
+        return disposalResponses;
+    }
+
     private Drugbox getDrugboxOrThrow(Long drugboxId) {
         return drugboxRepository.findById(drugboxId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DRUGBOX));
@@ -183,6 +208,11 @@ public class DrugService {
         if(drugInfo.isEmpty()){
             drugApiService.getDrugInfo(name);
         }
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 
     public DrugResponse DrugToDrugResponse(Drug drug){
