@@ -174,6 +174,7 @@ public class DrugService {
                     .collect(Collectors.toList());
 
             DisposalResponse disposalResponse = DisposalResponse.builder()
+                    .drugboxId(drugbox.getId())
                     .drugboxName(drugbox.getName())
                     .drugResponses(drugResponses)
                     .build();
