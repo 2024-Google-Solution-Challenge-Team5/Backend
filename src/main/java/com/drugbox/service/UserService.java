@@ -1,5 +1,8 @@
 package com.drugbox.service;
 
+import com.drugbox.common.exception.CustomException;
+import com.drugbox.common.exception.ErrorCode;
+import com.drugbox.domain.User;
 import com.drugbox.dto.response.UserEmailResponse;
 import com.drugbox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +21,22 @@ public class UserService {
     public UserEmailResponse findUserInfoById(Long userId){
         return userRepository.findById(userId)
                 .map(UserEmailResponse::of)
-                .orElseThrow(()-> new RuntimeException("로그인 유저 정보가 없습니다."));
+                .orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 
     public UserEmailResponse findUserInfoByEmail(String email){
         return userRepository.findByEmail(email)
                 .map(UserEmailResponse::of)
-                .orElseThrow(()-> new RuntimeException("유저 정보가 없습니다."));
+                .orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    public void giveUserRewardPoint(Long userId){
+        User user = getUserOrThrow(userId);
+        user.add100Point();
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 }
