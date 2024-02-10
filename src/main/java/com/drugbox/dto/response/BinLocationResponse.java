@@ -8,8 +8,8 @@ import lombok.Getter;
 @Builder
 public class BinLocationResponse {
     private Long id;
-    private String x;
-    private String y;
+    private String lat;
+    private String lng;
     private String address;
     private String addrLvl1; // 시,도
     private String addrLvl2; // 시,군,구

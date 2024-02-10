@@ -36,8 +36,8 @@ public class MapService {
             for(Object obj : features){
                 JSONObject feature = (JSONObject) obj;
                 JSONObject properties = (JSONObject) feature.get("properties");
-                String x = (String) properties.get("COORD_X");
-                String y = (String) properties.get("COORD_Y");
+                String lat = (String) properties.get("COORD_Y");
+                String lng = (String) properties.get("COORD_X");
                 String addr = (String) properties.get("ADDR_NEW"); // 도로명주소
                 String detail = (String) properties.get("VALUE_01");  // ex) 복지관, 구청, 주민센터
                 String[] parts = addr.split("\\s+");
@@ -45,8 +45,8 @@ public class MapService {
                 String addrLvl2 = parts[1];
 
                 BinLocation bin = BinLocation.builder()
-                        .x(x)
-                        .y(y)
+                        .lat(lat)
+                        .lng(lng)
                         .address(addr)
                         .detail(detail)
                         .addrLvl1(addrLvl1)
@@ -84,8 +84,8 @@ public class MapService {
         return BinLocationResponse.builder()
                 .id(bin.getId())
                 .address(bin.getAddress())
-                .x(bin.getY())
-                .y(bin.getY())
+                .lat(bin.getLat())
+                .lng(bin.getLng())
                 .detail(bin.getDetail())
                 .addrLvl1(bin.getAddrLvl1())
                 .addrLvl2(bin.getAddrLvl2())

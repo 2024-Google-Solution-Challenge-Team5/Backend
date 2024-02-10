@@ -21,9 +21,9 @@ public class BinLocation extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String x;
+    private String lat;
     @Column(nullable = false)
-    private String y;
+    private String lng;
     @Column(nullable = false)
     private String address;
     private String addrLvl1; // 시,도
