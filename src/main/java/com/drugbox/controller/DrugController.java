@@ -1,7 +1,9 @@
 package com.drugbox.controller;
 
+import com.drugbox.common.auth.SecurityUtil;
 import com.drugbox.dto.request.DrugRequest;
 import com.drugbox.dto.request.DrugUpdateRequest;
+import com.drugbox.dto.response.DisposalResponse;
 import com.drugbox.dto.response.DrugDetailResponse;
 import com.drugbox.dto.response.DrugResponse;
 import com.drugbox.dto.response.IdResponse;
@@ -65,6 +67,12 @@ public class DrugController {
     @GetMapping("/search")
     public ResponseEntity<List<String>> searchDrugs(@RequestParam(value="name") String name) throws IOException, ParseException {
         List<String> response = drugApiService.getSearchDrugs(name);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/dispose/list")
+    public ResponseEntity<List<DisposalResponse>> getDisposalList(){
+        List<DisposalResponse> response = drugService.getDisposalList(SecurityUtil.getCurrentUserId());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
