@@ -40,3 +40,4 @@ out/
 application.properties
 google-cloud.json
 google-oauth.json
+seoul.geojson
