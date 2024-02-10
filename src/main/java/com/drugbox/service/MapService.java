@@ -1,6 +1,7 @@
 package com.drugbox.service;
 
 import com.drugbox.domain.BinLocation;
+import com.drugbox.dto.response.BinLocationResponse;
 import com.drugbox.repository.BinLocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.json.simple.parser.JSONParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,6 @@ public class MapService {
     private final BinLocationRepository binLocationRepository;
 
     public void saveSeoulDrugBinLocations(){
-
         JSONParser parser = new JSONParser();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("seoul.geojson")){
             JSONObject jsonObject = (JSONObject) parser.parse(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
@@ -56,5 +58,24 @@ public class MapService {
         } catch (ParseException e){
             e.printStackTrace();
         }
+    }
+
+    public List<BinLocationResponse> getSeoulDrugBinLocations(){
+        List<BinLocation> binLocations = binLocationRepository.findAll();
+        return binLocations.stream()
+                .map(bin -> BinLocationToBinLocationResponse(bin))
+                .collect(Collectors.toList());
+    }
+
+    private BinLocationResponse BinLocationToBinLocationResponse(BinLocation bin){
+        return BinLocationResponse.builder()
+                .id(bin.getId())
+                .address(bin.getAddress())
+                .x(bin.getY())
+                .y(bin.getY())
+                .detail(bin.getDetail())
+                .addrLvl1(bin.getAddrLvl1())
+                .addrLvl2(bin.getAddrLvl2())
+                .build();
     }
 }
