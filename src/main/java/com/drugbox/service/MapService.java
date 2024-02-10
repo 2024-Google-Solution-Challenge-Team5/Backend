@@ -16,6 +16,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,18 @@ public class MapService {
 
     public List<BinLocationResponse> getSeoulDrugBinLocations(){
         List<BinLocation> binLocations = binLocationRepository.findAll();
+        return binLocations.stream()
+                .map(bin -> BinLocationToBinLocationResponse(bin))
+                .collect(Collectors.toList());
+    }
+
+    public List<BinLocationResponse> getDivisionDrugBinLocations(String addrLvl1, String addrLvl2){
+        List<BinLocation> binLocations = new ArrayList<>();
+        if(addrLvl2 == null){
+            binLocations = binLocationRepository.findAllByAddrLvl1(addrLvl1);
+        } else {
+            binLocations = binLocationRepository.findAllByAddrLvl1AndAddrLvl2(addrLvl1, addrLvl2);
+        }
         return binLocations.stream()
                 .map(bin -> BinLocationToBinLocationResponse(bin))
                 .collect(Collectors.toList());

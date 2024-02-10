@@ -29,4 +29,12 @@ public class MapController {
         List<BinLocationResponse> response = mapService.getSeoulDrugBinLocations();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/division")
+    public ResponseEntity<List<BinLocationResponse>> getDivisionDrugBinLocations(
+            @RequestParam(value="addrLvl1") String addrLvl1,
+            @RequestParam(value="addrLvl2", required = false) String addrLvl2){
+        List<BinLocationResponse> response = mapService.getDivisionDrugBinLocations(addrLvl1, addrLvl2);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
