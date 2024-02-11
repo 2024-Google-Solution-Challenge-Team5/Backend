@@ -47,5 +47,8 @@ public class User extends BaseEntity {
 
     public void setProviderAccessToken(String token){ this.providerAccessToken = token; }
     public void setImage(String image){ this.image = image; }
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
     public void add100Point(){ this.point += 100;}
 }

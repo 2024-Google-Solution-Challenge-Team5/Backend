@@ -35,6 +35,13 @@ public class UserService {
         user.add100Point();
     }
 
+    // 유저 이름 변경
+    public void changeUserNickname(Long userId, String nickname){
+        User user = getUserOrThrow(userId);
+        user.setNickname(nickname);
+        userRepository.save(user);
+    }
+
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));

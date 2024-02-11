@@ -32,4 +32,10 @@ public class UserController {
         userService.giveUserRewardPoint(SecurityUtil.getCurrentUserId());
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PatchMapping("/setting/name")
+    public ResponseEntity<Void> changeUserNickname(@RequestParam String nickname){
+        userService.changeUserNickname(SecurityUtil.getCurrentUserId(),nickname);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
