@@ -7,6 +7,7 @@ spring:
     url: ${application.spring.datasource.url}
     username: ${application.spring.datasource.username}
     password: ${application.spring.datasource.password}
+    databaseAPI: ${application.spring.datasource.databaseAPI}
 
   jpa:
     generate-ddl: true
