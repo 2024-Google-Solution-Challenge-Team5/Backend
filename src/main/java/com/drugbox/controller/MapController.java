@@ -24,6 +24,12 @@ public class MapController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @PostMapping("/division/save")
+    public ResponseEntity<Void> saveDrugBinLocations() {
+        mapService.saveDrugBinLocations();
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @GetMapping("/seoul")
     public ResponseEntity<List<BinLocationResponse>> getSeoulDrugBinLocations(){
         List<BinLocationResponse> response = mapService.getSeoulDrugBinLocations();

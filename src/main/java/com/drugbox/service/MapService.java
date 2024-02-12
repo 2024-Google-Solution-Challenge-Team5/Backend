@@ -1,8 +1,11 @@
 package com.drugbox.service;
 
+import com.drugbox.common.Util.GeocodingUtil;
 import com.drugbox.domain.BinLocation;
 import com.drugbox.dto.response.BinLocationResponse;
 import com.drugbox.repository.BinLocationRepository;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
@@ -13,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.json.simple.parser.JSONParser;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class MapService {
     private final BinLocationRepository binLocationRepository;
+    private final GeocodingUtil geocodingUtil;
 
     public void saveSeoulDrugBinLocations(){
         JSONParser parser = new JSONParser();
@@ -57,6 +61,41 @@ public class MapService {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void saveDrugBinLocations(){
+        saveSeoulDrugBinLocations();
+
+        String[] line;
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("drugbin.CSV")){
+            CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, "UTF-8"))
+                    .withSkipLines(1)
+                    .build();
+            csvReader.skip(1); // skip header
+            while((line = csvReader.readNext()) != null) {
+                String lat = "";
+                String lng = "";
+                if(line[4].equals("") || line[5].equals("")){
+                    Map<String, String> coords = geocodingUtil.getCoordsByAddress(line[3]);
+                    lat = coords.get("lat");
+                    lng = coords.get("lng");
+                } else{
+                    lat = line[4];
+                    lng = line[5];
+                }
+                BinLocation bin = BinLocation.builder()
+                        .lat(lat)
+                        .lng(lng)
+                        .addrLvl1(line[0])
+                        .addrLvl2(line[1])
+                        .detail(line[2])
+                        .address(line[3])
+                        .build();
+                binLocationRepository.save(bin);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
