@@ -71,9 +71,8 @@ public class MapService {
         String[] line;
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("drugbin.CSV")){
             CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, "UTF-8"))
-                    .withSkipLines(1)
+                    .withSkipLines(1) // skip header
                     .build();
-            csvReader.skip(1); // skip header
             while((line = csvReader.readNext()) != null) {
                 String lat = "";
                 String lng = "";
