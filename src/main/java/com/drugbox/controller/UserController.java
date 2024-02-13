@@ -56,4 +56,10 @@ public class UserController {
         userService.changeIsNewAnnounce(SecurityUtil.getCurrentUserId(),isNewAnnounce);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("/setting/reward")
+    public ResponseEntity<Integer> getUserRewardPoint(){
+        int response = userService.getUserRewardPoints(SecurityUtil.getCurrentUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

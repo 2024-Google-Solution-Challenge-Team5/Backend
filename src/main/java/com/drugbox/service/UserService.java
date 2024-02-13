@@ -69,6 +69,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    // 리워드 포인트 확인
+    public int getUserRewardPoints(Long userId){
+        User user = getUserOrThrow(userId);
+        return user.getPoint();
+    }
+
+
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
