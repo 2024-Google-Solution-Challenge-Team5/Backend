@@ -5,7 +5,6 @@ import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.domain.NotificationSetting;
 import com.drugbox.domain.User;
 import com.drugbox.dto.response.UserEmailResponse;
-import com.drugbox.repository.NotificationSettingRepository;
 import com.drugbox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final NotificationSettingRepository notificationSettingRepository;
 
     public UserEmailResponse findUserInfoById(Long userId){
         return userRepository.findById(userId)
