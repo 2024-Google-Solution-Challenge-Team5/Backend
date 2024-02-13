@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -44,6 +46,10 @@ public class User extends BaseEntity {
     private String image;
     @Builder.Default
     private int point = 0;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private NotificationSetting notificationSetting = new NotificationSetting();
 
     public void setProviderAccessToken(String token){ this.providerAccessToken = token; }
     public void setImage(String image){ this.image = image; }

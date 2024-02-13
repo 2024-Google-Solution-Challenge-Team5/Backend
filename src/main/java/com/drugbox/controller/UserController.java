@@ -38,4 +38,22 @@ public class UserController {
         userService.changeUserNickname(SecurityUtil.getCurrentUserId(),nickname);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PatchMapping("/setting/notification/expdate")
+    public ResponseEntity<Void> changeIsExpDate(@RequestParam boolean isExpDate){
+        userService.changeIsExpDate(SecurityUtil.getCurrentUserId(),isExpDate);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PatchMapping("/setting/notification/disposaldrugs")
+    public ResponseEntity<Void> changeIsDisposalDrugs(@RequestParam boolean isDisposalDrugs){
+        userService.changeIsDisposalDrugs(SecurityUtil.getCurrentUserId(),isDisposalDrugs);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PatchMapping("/setting/notification/newannounce")
+    public ResponseEntity<Void> changeIsNewAnnounce(@RequestParam boolean isNewAnnounce){
+        userService.changeIsNewAnnounce(SecurityUtil.getCurrentUserId(),isNewAnnounce);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
