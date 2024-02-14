@@ -40,6 +40,7 @@ public class UserService {
     // 유저 이름 변경
     public void changeUserNickname(Long userId, String nickname){
         User user = getUserOrThrow(userId);
+        checkNicknameAvailability(nickname);
         user.setNickname(nickname);
         userRepository.save(user);
     }
@@ -86,5 +87,11 @@ public class UserService {
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    private void checkNicknameAvailability(String nickname){
+        if(userRepository.findByNickname(nickname).isPresent()){
+            throw new CustomException(ErrorCode.EXIST_USER_NICKNAME);
+        }
     }
 }
