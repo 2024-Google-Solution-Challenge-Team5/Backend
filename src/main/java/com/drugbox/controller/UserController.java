@@ -47,20 +47,20 @@ public class UserController {
     }
 
     @PatchMapping("/setting/notification/expdate")
-    public ResponseEntity<Void> changeIsExpDate(@RequestParam boolean isExpDate){
-        userService.changeIsExpDate(SecurityUtil.getCurrentUserId(),isExpDate);
+    public ResponseEntity<Void> changeIsExpDateNotificationEnabled(@RequestParam boolean isExpDateNotificationEnabled){
+        userService.changeIsExpDateNotificationEnabled(SecurityUtil.getCurrentUserId(), isExpDateNotificationEnabled);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PatchMapping("/setting/notification/disposaldrugs")
-    public ResponseEntity<Void> changeIsDisposalDrugs(@RequestParam boolean isDisposalDrugs){
-        userService.changeIsDisposalDrugs(SecurityUtil.getCurrentUserId(),isDisposalDrugs);
+    public ResponseEntity<Void> changeIsDisposalDrugsNotificationEnabled(@RequestParam boolean isDisposalDrugsNotificationEnabled){
+        userService.changeIsDisposalDrugsNotificationEnabled(SecurityUtil.getCurrentUserId(), isDisposalDrugsNotificationEnabled);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PatchMapping("/setting/notification/newannounce")
-    public ResponseEntity<Void> changeIsNewAnnounce(@RequestParam boolean isNewAnnounce){
-        userService.changeIsNewAnnounce(SecurityUtil.getCurrentUserId(),isNewAnnounce);
+    public ResponseEntity<Void> changeIsNewAnnounceNotificationEnabled(@RequestParam boolean isNewAnnounceNotificationEnabled){
+        userService.changeIsNewAnnounceNotificationEnabled(SecurityUtil.getCurrentUserId(), isNewAnnounceNotificationEnabled);
         return new ResponseEntity(HttpStatus.OK);
     }
 

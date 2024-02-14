@@ -46,26 +46,26 @@ public class UserService {
     }
 
     // 푸시 알림 설정 - 유통기한 알림
-   public void changeIsExpDate(Long userId, boolean isExpDate){
+   public void changeIsExpDateNotificationEnabled(Long userId, boolean isExpDateNotificationEnabled){
         User user = getUserOrThrow(userId);
         NotificationSetting notificationSetting = user.getNotificationSetting();
-        notificationSetting.setExpDate(isExpDate);
+        notificationSetting.setIsExpDateNotificationEnabled(isExpDateNotificationEnabled);
         userRepository.save(user);
     }
 
     // 푸시 알림 설정 - 폐기할 의약품 알림
-    public void changeIsDisposalDrugs(Long userId, boolean isDisposalDrugs){
+    public void changeIsDisposalDrugsNotificationEnabled(Long userId, boolean isDisposalDrugsNotificationEnabled){
         User user = getUserOrThrow(userId);
         NotificationSetting notificationSetting = user.getNotificationSetting();
-        notificationSetting.setDisposalDrugs(isDisposalDrugs);
+        notificationSetting.setIsDisposalDrugsNotificationEnabled(isDisposalDrugsNotificationEnabled);
         userRepository.save(user);
     }
 
     // 푸시 알림 설정 - 새 공지사항
-    public void changeIsNewAnnounce(Long userId, boolean isNewAnnounce){
+    public void changeIsNewAnnounceNotificationEnabled(Long userId, boolean isNewAnnounceNotificationEnabled){
         User user = getUserOrThrow(userId);
         NotificationSetting notificationSetting = user.getNotificationSetting();
-        notificationSetting.setNewAnnounce(isNewAnnounce);
+        notificationSetting.setIsNewAnnounceNotificationEnabled(isNewAnnounceNotificationEnabled);
         userRepository.save(user);
     }
 

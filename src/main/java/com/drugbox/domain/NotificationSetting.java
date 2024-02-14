@@ -19,17 +19,17 @@ public class NotificationSetting extends BaseEntity {
     @Column(name = "notificationsetting_id")
     private Long id;
 
-    private boolean expDate = true;
-    private boolean disposalDrugs = true;
-    private boolean newAnnounce = true;
+    private boolean isExpDateNotificationEnabled = true;
+    private boolean isDisposalDrugsNotificationEnabled = true;
+    private boolean isNewAnnounceNotificationEnabled = true;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    public void setExpDate(boolean expDate) { this.expDate = expDate; }
-    public void setDisposalDrugs(boolean disposalDrugs) { this.disposalDrugs = disposalDrugs; }
-    public void setNewAnnounce(boolean newAnnounce) { this.newAnnounce = newAnnounce; }
+    public void setIsExpDateNotificationEnabled(boolean expDate) { this.isExpDateNotificationEnabled = expDate; }
+    public void setIsDisposalDrugsNotificationEnabled(boolean disposalDrugs) { this.isDisposalDrugsNotificationEnabled = disposalDrugs; }
+    public void setIsNewAnnounceNotificationEnabled(boolean newAnnounce) { this.isNewAnnounceNotificationEnabled = newAnnounce; }
 
 }
