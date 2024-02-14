@@ -1,5 +1,6 @@
 package com.drugbox.controller;
 
+import com.drugbox.dto.response.UserDetailResponse;
 import com.drugbox.dto.response.UserEmailResponse;
 import com.drugbox.service.UserService;
 import com.drugbox.common.auth.SecurityUtil;
@@ -37,6 +38,12 @@ public class UserController {
     public ResponseEntity<Void> changeUserNickname(@RequestParam String nickname){
         userService.changeUserNickname(SecurityUtil.getCurrentUserId(),nickname);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping("/setting/detail")
+    public ResponseEntity<UserDetailResponse> getUserDetail(){
+        UserDetailResponse response = userService.getUserDetail(SecurityUtil.getCurrentUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PatchMapping("/setting/notification/expdate")

@@ -4,6 +4,7 @@ import com.drugbox.common.exception.CustomException;
 import com.drugbox.common.exception.ErrorCode;
 import com.drugbox.domain.NotificationSetting;
 import com.drugbox.domain.User;
+import com.drugbox.dto.response.UserDetailResponse;
 import com.drugbox.dto.response.UserEmailResponse;
 import com.drugbox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -73,6 +74,14 @@ public class UserService {
         return user.getPoint();
     }
 
+    // 유저 설정 조회
+    public UserDetailResponse getUserDetail(Long userId){
+        User user = getUserOrThrow(userId);
+        return UserDetailResponse.builder()
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .build();
+    }
 
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
