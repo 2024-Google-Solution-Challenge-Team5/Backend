@@ -37,7 +37,7 @@ public class MapService {
     private final BinLocationRepository binLocationRepository;
     private final GeocodingUtil geocodingUtil;
 
-    @Value("${application.spring.cloud.gcp.geocodingAPI}")
+    @Value("${application.spring.cloud.gcp.placeAPI}")
     private String API_KEY;
 
     public void saveSeoulDrugBinLocations(){
