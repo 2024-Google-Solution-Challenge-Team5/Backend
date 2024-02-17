@@ -147,7 +147,8 @@ public class MapService {
                     "\"center\":{" +
                         "\"latitude\":"+ coordRequest.getLatitude() +
                         ",\"longitude\":" + coordRequest.getLongitude() + "}," +
-                        "\"radius\": 1000.0 } } }");
+                        "\"radius\": 1000.0 } } },");
+        requestBody.append("\"languageCode\":\"ko\"}");
 
         return getLocationsDetail(requestUrl,requestBody.toString());
     }
