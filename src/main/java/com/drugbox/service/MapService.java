@@ -2,7 +2,9 @@ package com.drugbox.service;
 
 import com.drugbox.common.Util.GeocodingUtil;
 import com.drugbox.domain.BinLocation;
+import com.drugbox.dto.request.CoordRequest;
 import com.drugbox.dto.response.BinLocationResponse;
+import com.drugbox.dto.response.MapResponse;
 import com.drugbox.repository.BinLocationRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -11,12 +13,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.json.simple.parser.JSONParser;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +36,9 @@ import java.util.stream.Collectors;
 public class MapService {
     private final BinLocationRepository binLocationRepository;
     private final GeocodingUtil geocodingUtil;
+
+    @Value("${application.spring.cloud.gcp.geocodingAPI}")
+    private String API_KEY;
 
     public void saveSeoulDrugBinLocations(){
         JSONParser parser = new JSONParser();
@@ -128,5 +137,51 @@ public class MapService {
                 .addrLvl1(bin.getAddrLvl1())
                 .addrLvl2(bin.getAddrLvl2())
                 .build();
+    }
+
+    public List<MapResponse> getNearbyPharmacyAndConvenienceLocations(CoordRequest coordRequest) throws IOException, ParseException {
+        String requestUrl = "https://places.googleapis.com/v1/places:searchNearby";
+        StringBuilder requestBody = new StringBuilder();
+        requestBody.append("{\"includedTypes\":[\"pharmacy\",\"convenience_store\"],"); // 약국, 편의점 검색
+        requestBody.append("\"locationRestriction\":{" +
+                "\"circle\":{" +
+                    "\"center\":{" +
+                        "\"latitude\":"+ coordRequest.getLatitude() +
+                        ",\"longitude\":" + coordRequest.getLongitude() + "}," +
+                        "\"radius\": 1000.0 } } }");
+        URL url = new URL(requestUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type","application/json");
+        conn.setRequestProperty("X-Goog-Api-key",API_KEY);
+        conn.setRequestProperty("X-Goog-FieldMask","places.displayName,places.formattedAddress,places.id");
+
+        StringBuilder response = new StringBuilder();
+        String responseLine;
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+            while((responseLine = br.readLine()) != null){
+                response.append(responseLine);
+            }
+        }
+        conn.disconnect();
+
+        String result = response.toString();
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(result);
+        JSONArray locations = (JSONArray) jsonObject.get("places");
+        List<MapResponse> mapResponses = new ArrayList<>();
+        for(Object object: locations){
+            JSONObject location = (JSONObject) object;
+            Map<String, String> coords = geocodingUtil.getCoordsByAddress((String)location.get("formattedAddress"));
+            MapResponse mapResponse = MapResponse.builder()
+                    .locationName((String)location.get("displayName"))
+                    .locationAddress((String)location.get("formattedAddress"))
+                    .locationId((String)location.get("id"))
+                    .latitude(coords.get("lat"))
+                    .longitude(coords.get("lng"))
+                    .build();
+            mapResponses.add(mapResponse);
+        }
+        return mapResponses;
     }
 }
