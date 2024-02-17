@@ -2,6 +2,7 @@ package com.drugbox.controller;
 
 import com.drugbox.dto.request.CoordRequest;
 import com.drugbox.dto.response.BinLocationResponse;
+import com.drugbox.dto.response.MapDetailResponse;
 import com.drugbox.dto.response.MapResponse;
 import com.drugbox.service.MapService;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,11 @@ public class MapController {
     public ResponseEntity<List<MapResponse>> searchLocations(@RequestParam String name) throws IOException, ParseException {
         List<MapResponse> responses = mapService.searchLocations(name);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<MapDetailResponse> getLocationDetail(@RequestParam String id) throws IOException, ParseException {
+        MapDetailResponse response = mapService.searchLocationDetail(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

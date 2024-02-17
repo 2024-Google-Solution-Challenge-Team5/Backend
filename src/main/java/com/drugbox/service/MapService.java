@@ -4,6 +4,7 @@ import com.drugbox.common.Util.GeocodingUtil;
 import com.drugbox.domain.BinLocation;
 import com.drugbox.dto.request.CoordRequest;
 import com.drugbox.dto.response.BinLocationResponse;
+import com.drugbox.dto.response.MapDetailResponse;
 import com.drugbox.dto.response.MapResponse;
 import com.drugbox.repository.BinLocationRepository;
 import com.opencsv.CSVReader;
@@ -162,6 +163,12 @@ public class MapService {
         return getLocationsDetail(requestUrl,requestBody);
     }
 
+    // 장소 세부사항
+    public MapDetailResponse searchLocationDetail(String id) throws IOException, ParseException {
+        String requestUrl = "https://places.googleapis.com/v1/places/"+id;
+        return getLocationDetail(requestUrl);
+    }
+
     private List<MapResponse> getLocationsDetail(String requestUrl, String requestBody) throws IOException, ParseException {
         URL url = new URL(requestUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -187,6 +194,26 @@ public class MapService {
         return parseLocationsDetail(response.toString());
     }
 
+    private MapDetailResponse getLocationDetail(String requestUrl) throws IOException, ParseException {
+        URL url = new URL(requestUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-Type","application/json");
+        conn.setRequestProperty("X-Goog-Api-key",API_KEY);
+        conn.setRequestProperty("X-Goog-FieldMask","places.displayName,places.formattedAddress,places.id,places.photos,places.currentOpeningHours");
+
+        StringBuilder response = new StringBuilder();
+        String responseLine;
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+            while((responseLine = br.readLine()) != null){
+                response.append(responseLine);
+            }
+        }
+        conn.disconnect();
+
+        return parseLocationDetail(response.toString());
+    }
+
     private List<MapResponse> parseLocationsDetail(String result) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse(result);
@@ -205,5 +232,18 @@ public class MapService {
             mapResponses.add(mapResponse);
         }
         return mapResponses;
+    }
+
+    private MapDetailResponse parseLocationDetail(String result) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject location = (JSONObject) parser.parse(result);
+        JSONObject name = (JSONObject) location.get("displayName");
+        return MapDetailResponse.builder()
+                .locationName((String)name.get("text"))
+                .locationPhotos((String)location.get(""))
+                .locationId((String)location.get(""))
+                .formattedAddress((String)location.get("formattedAddress"))
+                .currentOpeningHours((String)location.get("currentOpeningHours"))
+                .build();
     }
 }
