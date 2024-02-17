@@ -53,4 +53,10 @@ public class MapController {
         List<MapResponse> responses = mapService.getNearbyPharmacyAndConvenienceLocations(coordRequest);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<MapResponse>> searchLocations(@RequestParam String name) throws IOException, ParseException {
+        List<MapResponse> responses = mapService.searchLocations(name);
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
 }

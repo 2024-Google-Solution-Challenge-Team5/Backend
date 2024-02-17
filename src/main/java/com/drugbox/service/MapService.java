@@ -21,7 +21,6 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -149,12 +148,31 @@ public class MapService {
                         "\"latitude\":"+ coordRequest.getLatitude() +
                         ",\"longitude\":" + coordRequest.getLongitude() + "}," +
                         "\"radius\": 1000.0 } } }");
+
+        return getLocationsDetail(requestUrl,requestBody.toString());
+    }
+
+    // 위치 검색하기
+    public List<MapResponse> searchLocations(String name) throws IOException, ParseException {
+        String requestUrl = "https://places.googleapis.com/v1/places:searchText";
+        String requestBody = "{\"textQuery\":\""+ name+"\"," +
+                "\"languageCode\":\"ko\"}";
+
+        return getLocationsDetail(requestUrl,requestBody);
+    }
+
+    private List<MapResponse> getLocationsDetail(String requestUrl, String requestBody) throws IOException, ParseException {
         URL url = new URL(requestUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type","application/json");
         conn.setRequestProperty("X-Goog-Api-key",API_KEY);
         conn.setRequestProperty("X-Goog-FieldMask","places.displayName,places.formattedAddress,places.id");
+
+        try (OutputStream os = conn.getOutputStream()) {
+            byte[] input = requestBody.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
 
         StringBuilder response = new StringBuilder();
         String responseLine;
@@ -165,7 +183,10 @@ public class MapService {
         }
         conn.disconnect();
 
-        String result = response.toString();
+        return parseLocationsDetail(response.toString());
+    }
+
+    private List<MapResponse> parseLocationsDetail(String result) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse(result);
         JSONArray locations = (JSONArray) jsonObject.get("places");
