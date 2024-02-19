@@ -234,16 +234,42 @@ public class MapService {
         return mapResponses;
     }
 
-    private MapDetailResponse parseLocationDetail(String result) throws ParseException {
+    private MapDetailResponse parseLocationDetail(String result) throws ParseException, IOException {
         JSONParser parser = new JSONParser();
         JSONObject location = (JSONObject) parser.parse(result);
         JSONObject name = (JSONObject) location.get("displayName");
+        JSONArray photos = (JSONArray) location.get("photos");
         return MapDetailResponse.builder()
                 .locationName((String)name.get("text"))
-                .locationPhotos((String)location.get(""))
-                .locationId((String)location.get(""))
+                .locationPhotos(getLocationPhotoUrl((String)photos.get(0)))
+                .locationId((String)location.get("id"))
                 .formattedAddress((String)location.get("formattedAddress"))
                 .currentOpeningHours((String)location.get("currentOpeningHours"))
                 .build();
+    }
+
+    private String getLocationPhotoUrl(String photoName) throws IOException, ParseException {
+        String requestUrl = "https://places.googleapis.com/v1/"+photoName+"/media?key="+API_KEY;
+
+        URL url = new URL(requestUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-Type","application/json");
+
+        StringBuilder response = new StringBuilder();
+        String responseLine;
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+            while((responseLine = br.readLine()) != null){
+                response.append(responseLine);
+            }
+        }
+        conn.disconnect();
+        return parseLocationPhotoUrl(response.toString());
+    }
+
+    private String parseLocationPhotoUrl(String result) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject photo = (JSONObject) parser.parse(result);
+        return (String) photo.get("photoUri");
     }
 }
