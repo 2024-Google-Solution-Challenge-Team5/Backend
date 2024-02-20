@@ -239,9 +239,10 @@ public class MapService {
         JSONObject location = (JSONObject) parser.parse(result);
         JSONObject name = (JSONObject) location.get("displayName");
         JSONArray photos = (JSONArray) location.get("photos");
+        JSONObject photo = (JSONObject) photos.get(0);
         return MapDetailResponse.builder()
                 .locationName((String)name.get("text"))
-                .locationPhotos(getLocationPhotoUrl((String)photos.get(0)))
+                .locationPhotos(getLocationPhotoUrl((String)photo.get("name")))
                 .locationId((String)location.get("id"))
                 .formattedAddress((String)location.get("formattedAddress"))
                 .currentOpeningHours((String)location.get("currentOpeningHours"))
