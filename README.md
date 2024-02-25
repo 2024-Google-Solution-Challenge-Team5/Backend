@@ -87,7 +87,7 @@ git clone https://github.com/2024-Google-Solution-Challenge-Team5/Backend.git
 
 <br/>
 
-- Create a database called `drugbox` in MySQL workbrench
+- Create a database called `drugbox` in MySQL 
 - Change the value of the `ddl-auto` variable inside `application.yml` to `create` only on the first execution.
 - Run `DrugboxApplication`
 <br/>
