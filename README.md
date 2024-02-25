@@ -106,6 +106,12 @@ git clone https://github.com/2024-Google-Solution-Challenge-Team5/Backend.git
 
 <br/>
 
+## 👥 Contributors
+- [Bomin Kwon](https://github.com/pingowl)
+- [Miju Kim](https://github.com/miju0515)
+
+<br/>
+
 ## 📎 Link
 - [Mobile Repository](https://github.com/2024-Google-Solution-Challenge-Team5/mobile-ios-native)
 - [AI Repository](https://github.com/2024-Google-Solution-Challenge-Team5/AI-MLDL)
