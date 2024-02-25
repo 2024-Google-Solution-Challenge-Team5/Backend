@@ -106,6 +106,12 @@ git clone https://github.com/2024-Google-Solution-Challenge-Team5/Backend.git
 
 <br/>
 
+
+## 📽 Demo Video
+[Youtube Link](https://www.youtube.com/watch?v=nOnOSi51t-M)
+
+<br/>
+
 ## 👥 Contributors
 - [Bomin Kwon](https://github.com/pingowl)
 - [Miju Kim](https://github.com/miju0515)
